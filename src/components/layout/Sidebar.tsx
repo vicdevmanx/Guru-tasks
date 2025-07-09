@@ -12,13 +12,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useProjects } from '@/hooks/useProjects';
+import { ProfileMenu } from '../ProfileMenu';
 
 export const Sidebar = () => {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
+  const collapsed = state === 'collapsed';
   const location = useLocation();
   const { projects, addProject } = useProjects();
 
@@ -26,8 +29,6 @@ export const Sidebar = () => {
     { title: 'Home', url: '/', icon: Home },
     { title: 'Profile', url: '/profile', icon: User },
   ];
-
-  const isActive = (path: string) => location.pathname === path;
 
   const handleAddProject = () => {
     const name = prompt('Enter project name:');
@@ -37,7 +38,7 @@ export const Sidebar = () => {
   };
 
   return (
-    <SidebarUI className={collapsed ? 'w-14' : 'w-64'} collapsible>
+    <SidebarUI className={collapsed ? 'w-14' : 'w-64'} collapsible="icon">
       <SidebarTrigger className="m-2 self-end" />
       
       <SidebarContent className="bg-card border-r">
@@ -47,7 +48,7 @@ export const Sidebar = () => {
             <SidebarMenu>
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={collapsed ? item.title : undefined}>
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
@@ -84,7 +85,7 @@ export const Sidebar = () => {
             <SidebarMenu>
               {projects.map((project) => (
                 <SidebarMenuItem key={project.id}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={collapsed ? project.name : undefined}>
                     <NavLink
                       to={`/project/${project.id}`}
                       className={({ isActive }) =>
@@ -103,6 +104,10 @@ export const Sidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter>
+        <ProfileMenu collapsed={collapsed} />
+      </SidebarFooter>
     </SidebarUI>
   );
 };

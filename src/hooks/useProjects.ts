@@ -134,6 +134,21 @@ export const useProjects = () => {
     );
   };
 
+  const moveTaskToStatus = (projectId: string, taskId: string, newStatus: Task['status']) => {
+    setProjects(prev =>
+      prev.map(project =>
+        project.id === projectId
+          ? {
+              ...project,
+              tasks: project.tasks.map(task =>
+                task.id === taskId ? { ...task, status: newStatus } : task
+              ),
+            }
+          : project
+      )
+    );
+  };
+
   const reorderTasks = (projectId: string, sourceIndex: number, destinationIndex: number) => {
     setProjects(prev =>
       prev.map(project => {
@@ -171,6 +186,7 @@ export const useProjects = () => {
     addTask,
     updateTask,
     deleteTask,
+    moveTaskToStatus,
     reorderTasks,
     chatMessages,
     addChatMessage,
