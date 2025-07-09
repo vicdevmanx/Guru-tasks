@@ -1,0 +1,179 @@
+
+import { useState } from 'react';
+
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: Date;
+  tasks: Task[];
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'todo' | 'in-progress' | 'done';
+  priority: 'low' | 'medium' | 'high';
+  assignee?: string;
+  createdAt: Date;
+  dueDate?: Date;
+}
+
+export interface ChatMessage {
+  id: string;
+  projectId: string;
+  message: string;
+  sender: string;
+  timestamp: Date;
+}
+
+const initialProjects: Project[] = [
+  {
+    id: '1',
+    name: 'Website Redesign',
+    description: 'Complete redesign of company website',
+    createdAt: new Date(),
+    tasks: [
+      {
+        id: 'task-1',
+        title: 'Design mockups',
+        description: 'Create initial design mockups for the homepage',
+        status: 'todo',
+        priority: 'high',
+        createdAt: new Date(),
+      },
+      {
+        id: 'task-2',
+        title: 'Implement header',
+        description: 'Code the new header component',
+        status: 'in-progress',
+        priority: 'medium',
+        createdAt: new Date(),
+      },
+      {
+        id: 'task-3',
+        title: 'Test on mobile',
+        description: 'Ensure mobile responsiveness',
+        status: 'done',
+        priority: 'low',
+        createdAt: new Date(),
+      },
+    ],
+  },
+];
+
+export const useProjects = () => {
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+
+  const addProject = (name: string, description?: string) => {
+    const newProject: Project = {
+      id: Date.now().toString(),
+      name,
+      description,
+      createdAt: new Date(),
+      tasks: [],
+    };
+    setProjects(prev => [...prev, newProject]);
+  };
+
+  const updateProject = (id: string, updates: Partial<Project>) => {
+    setProjects(prev =>
+      prev.map(project =>
+        project.id === id ? { ...project, ...updates } : project
+      )
+    );
+  };
+
+  const deleteProject = (id: string) => {
+    setProjects(prev => prev.filter(project => project.id !== id));
+  };
+
+  const addTask = (projectId: string, task: Omit<Task, 'id' | 'createdAt'>) => {
+    const newTask: Task = {
+      ...task,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+    };
+
+    setProjects(prev =>
+      prev.map(project =>
+        project.id === projectId
+          ? { ...project, tasks: [...project.tasks, newTask] }
+          : project
+      )
+    );
+  };
+
+  const updateTask = (projectId: string, taskId: string, updates: Partial<Task>) => {
+    setProjects(prev =>
+      prev.map(project =>
+        project.id === projectId
+          ? {
+              ...project,
+              tasks: project.tasks.map(task =>
+                task.id === taskId ? { ...task, ...updates } : task
+              ),
+            }
+          : project
+      )
+    );
+  };
+
+  const deleteTask = (projectId: string, taskId: string) => {
+    setProjects(prev =>
+      prev.map(project =>
+        project.id === projectId
+          ? {
+              ...project,
+              tasks: project.tasks.filter(task => task.id !== taskId),
+            }
+          : project
+      )
+    );
+  };
+
+  const reorderTasks = (projectId: string, sourceIndex: number, destinationIndex: number) => {
+    setProjects(prev =>
+      prev.map(project => {
+        if (project.id === projectId) {
+          const newTasks = Array.from(project.tasks);
+          const [reorderedTask] = newTasks.splice(sourceIndex, 1);
+          newTasks.splice(destinationIndex, 0, reorderedTask);
+          return { ...project, tasks: newTasks };
+        }
+        return project;
+      })
+    );
+  };
+
+  const addChatMessage = (projectId: string, message: string, sender: string) => {
+    const newMessage: ChatMessage = {
+      id: Date.now().toString(),
+      projectId,
+      message,
+      sender,
+      timestamp: new Date(),
+    };
+    setChatMessages(prev => [...prev, newMessage]);
+  };
+
+  const getProjectChatMessages = (projectId: string) => {
+    return chatMessages.filter(msg => msg.projectId === projectId);
+  };
+
+  return {
+    projects,
+    addProject,
+    updateProject,
+    deleteProject,
+    addTask,
+    updateTask,
+    deleteTask,
+    reorderTasks,
+    chatMessages,
+    addChatMessage,
+    getProjectChatMessages,
+  };
+};
