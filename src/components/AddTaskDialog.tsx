@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Select,
   SelectContent,
@@ -21,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { X, Plus } from 'lucide-react';
-import { Task } from '@/hooks/useProjects';
+import { Task, User, useProjects } from '@/hooks/useProjects';
 
 interface AddTaskDialogProps {
   open: boolean;
@@ -34,12 +35,13 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
   onOpenChange,
   onAddTask,
 }) => {
+  const { users } = useProjects();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     status: 'todo' as Task['status'],
     priority: 'medium' as Task['priority'],
-    assignees: [] as string[],
+    assignees: [] as User[],
   });
   const [currentAssignee, setCurrentAssignee] = useState('');
 
@@ -52,7 +54,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
       description: formData.description || undefined,
       status: formData.status,
       priority: formData.priority,
-      assignee: formData.assignees.length > 0 ? formData.assignees.join(', ') : undefined,
+      assignees: formData.assignees,
     });
 
     setFormData({
@@ -67,10 +69,17 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
   };
 
   const handleAddAssignee = () => {
-    if (currentAssignee.trim() && !formData.assignees.includes(currentAssignee.trim())) {
+    if (!currentAssignee.trim()) return;
+    
+    const user = users.find(u => 
+      u.name.toLowerCase().includes(currentAssignee.toLowerCase()) ||
+      u.email.toLowerCase().includes(currentAssignee.toLowerCase())
+    );
+    
+    if (user && !formData.assignees.find(a => a.id === user.id)) {
       setFormData(prev => ({
         ...prev,
-        assignees: [...prev.assignees, currentAssignee.trim()]
+        assignees: [...prev.assignees, user]
       }));
       setCurrentAssignee('');
     }
@@ -83,10 +92,10 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
     }
   };
 
-  const removeAssignee = (assignee: string) => {
+  const removeAssignee = (userId: string) => {
     setFormData(prev => ({
       ...prev,
-      assignees: prev.assignees.filter(a => a !== assignee)
+      assignees: prev.assignees.filter(a => a.id !== userId)
     }));
   };
 
@@ -171,7 +180,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
                 value={currentAssignee}
                 onChange={(e) => setCurrentAssignee(e.target.value)}
                 onKeyPress={handleAssigneeKeyPress}
-                placeholder="Type name and press Enter"
+                placeholder="Type name or email and press Enter"
                 className="flex-1"
               />
               <Button
@@ -186,12 +195,17 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
             </div>
             {formData.assignees.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.assignees.map((assignee, index) => (
-                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                    {assignee}
+                {formData.assignees.map((user) => (
+                  <Badge key={user.id} variant="secondary" className="flex items-center gap-2 pr-1">
+                    <Avatar className="w-4 h-4">
+                      <AvatarFallback className="text-xs">
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    {user.name}
                     <button
                       type="button"
-                      onClick={() => removeAssignee(assignee)}
+                      onClick={() => removeAssignee(user.id)}
                       className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
                     >
                       <X className="h-3 w-3" />

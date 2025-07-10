@@ -4,7 +4,15 @@ import { useParams } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, MessageCircle, MoreHorizontal, Filter, Search, Users } from 'lucide-react';
+import { Plus, MessageCircle, MoreHorizontal, Filter, Search, Users, BarChart3, Calendar } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useProjects } from '@/hooks/useProjects';
 import { TaskCard } from '@/components/TaskCard';
 import { AddTaskDialog } from '@/components/AddTaskDialog';
@@ -16,6 +24,8 @@ export const ProjectView = () => {
   const { projects, moveTaskToStatus, addTask, updateTask, deleteTask } = useProjects();
   const [showAddTask, setShowAddTask] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [activeColumn, setActiveColumn] = useState<string | null>(null);
+  const [showOverview, setShowOverview] = useState(false);
 
   const project = projects.find(p => p.id === projectId);
 
@@ -36,7 +46,6 @@ export const ProjectView = () => {
     const sourceStatus = result.source.droppableId as 'todo' | 'in-progress' | 'done';
     const destinationStatus = result.destination.droppableId as 'todo' | 'in-progress' | 'done';
 
-    // If dropped in different column, update status
     if (sourceStatus !== destinationStatus) {
       moveTaskToStatus(project.id, result.draggableId, destinationStatus);
     }
@@ -67,19 +76,164 @@ export const ProjectView = () => {
     },
   ];
 
+  const totalTasks = project.tasks.length;
+  const completedTasks = project.tasks.filter(task => task.status === 'done').length;
+  const pendingTasks = totalTasks - completedTasks;
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  if (showOverview) {
+    return (
+      <div className="p-6 space-y-6 animate-fade-in">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">{project.name} Overview</h1>
+            <p className="text-muted-foreground">{project.description}</p>
+          </div>
+          <Button onClick={() => setShowOverview(false)} variant="outline">
+            Back to Board
+          </Button>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+              <Users className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalTasks}</div>
+              <p className="text-xs text-muted-foreground">Tasks in project</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-orange-500">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <Calendar className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{pendingTasks}</div>
+              <p className="text-xs text-muted-foreground">Tasks in progress</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-green-500">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completed</CardTitle>
+              <BarChart3 className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{completedTasks}</div>
+              <p className="text-xs text-muted-foreground">{completionRate}% completion rate</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-purple-500">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+              <Users className="h-4 w-4 text-purple-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{project.assignees.length}</div>
+              <p className="text-xs text-muted-foreground">Active members</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Team Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Team Members</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {project.assignees.map(user => (
+                <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent">
+                  <Avatar>
+                    <AvatarFallback>
+                      {user.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  </div>
+                  <Badge variant="secondary">{user.role}</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-screen flex flex-col overflow-hidden bg-background">
       {/* Header */}
       <div className="flex-shrink-0 p-4 border-b border-border bg-background">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
-            <p className="text-muted-foreground text-sm">{project.description}</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
+              <p className="text-muted-foreground text-sm">{project.description}</p>
+            </div>
+            
+            {/* Team Avatars */}
+            <div className="flex items-center">
+              <div className="flex -space-x-2">
+                {project.assignees.slice(0, 3).map((user, index) => (
+                  <Avatar key={user.id} className="border-2 border-background w-8 h-8">
+                    <AvatarFallback className="text-xs">
+                      {user.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                {project.assignees.length > 3 && (
+                  <div className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium">
+                    +{project.assignees.length - 3}
+                  </div>
+                )}
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="ml-2">
+                    <Users className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-64">
+                  <div className="p-2">
+                    <h4 className="font-medium mb-2">Team Members</h4>
+                    {project.assignees.map(user => (
+                      <div key={user.id} className="flex items-center gap-2 p-2 rounded hover:bg-accent">
+                        <Avatar className="w-6 h-6">
+                          <AvatarFallback className="text-xs">
+                            {user.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{user.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
+          
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Users className="h-4 w-4" />
-              Share
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowOverview(true)}
+            >
+              <BarChart3 className="h-4 w-4" />
+              Overview
             </Button>
             <Button
               variant="outline"
@@ -114,27 +268,17 @@ export const ProjectView = () => {
             <Button variant="ghost" size="sm" className="text-xs">
               Sort
             </Button>
-            <Button variant="ghost" size="sm" className="text-xs">
-              Closed
-            </Button>
-            <Button variant="ghost" size="sm" className="text-xs">
-              Assignee
-            </Button>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
               <Input 
-                placeholder="Search..." 
+                placeholder="Search tasks..." 
                 className="pl-7 h-7 w-48 text-xs"
               />
             </div>
             <Button variant="ghost" size="sm" className="text-xs">
               Customize
-            </Button>
-            <Button variant="ghost" size="sm" className="gap-2 text-xs bg-blue-600 text-white hover:bg-blue-700">
-              <Plus className="h-3 w-3" />
-              Add Task
             </Button>
           </div>
         </div>
@@ -161,12 +305,35 @@ export const ProjectView = () => {
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 w-6 p-0"
+                      onClick={() => {
+                        setActiveColumn(column.id);
+                        setShowAddTask(true);
+                      }}
+                    >
                       <Plus className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <MoreHorizontal className="h-3 w-3" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                          <MoreHorizontal className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => setShowAddTask(true)}>
+                          Add Task
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          Clear Column
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          Archive Tasks
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
 
@@ -183,7 +350,7 @@ export const ProjectView = () => {
                       style={{
                         overflowY: 'auto',
                         maxHeight: 'calc(100vh - 200px)',
-                        scrollbarWidth: 'thin'
+                        scrollBehavior: 'smooth'
                       }}
                     >
                       {column.tasks.map((task, index) => (
@@ -199,13 +366,14 @@ export const ProjectView = () => {
                               {...provided.dragHandleProps}
                               className={`transition-all duration-200 ${
                                 snapshot.isDragging 
-                                  ? 'rotate-2 scale-105 shadow-2xl z-50' 
+                                  ? 'rotate-1 scale-105 shadow-2xl z-50' 
                                   : ''
                               }`}
                               style={{
                                 ...provided.draggableProps.style,
-                                // Fix for scroll issue during drag
-                                position: snapshot.isDragging ? 'fixed' : 'relative'
+                                transform: snapshot.isDragging 
+                                  ? `${provided.draggableProps.style?.transform} rotate(2deg)`
+                                  : provided.draggableProps.style?.transform
                               }}
                             >
                               <TaskCard
@@ -221,11 +389,13 @@ export const ProjectView = () => {
                       ))}
                       {provided.placeholder}
                       
-                      {/* Add Task Button */}
                       <Button 
                         variant="ghost" 
                         className="w-full justify-start text-muted-foreground hover:text-foreground h-8 text-xs"
-                        onClick={() => setShowAddTask(true)}
+                        onClick={() => {
+                          setActiveColumn(column.id);
+                          setShowAddTask(true);
+                        }}
                       >
                         <Plus className="h-3 w-3 mr-2" />
                         Add Task
@@ -236,7 +406,6 @@ export const ProjectView = () => {
               </div>
             ))}
             
-            {/* Add Group Button */}
             <div className="flex-shrink-0 w-80">
               <Button 
                 variant="ghost" 
@@ -252,11 +421,18 @@ export const ProjectView = () => {
 
       <AddTaskDialog
         open={showAddTask}
-        onOpenChange={setShowAddTask}
-        onAddTask={(task) => addTask(project.id, task)}
+        onOpenChange={(open) => {
+          setShowAddTask(open);
+          if (!open) setActiveColumn(null);
+        }}
+        onAddTask={(task) => {
+          const taskWithStatus = activeColumn 
+            ? { ...task, status: activeColumn as 'todo' | 'in-progress' | 'done' }
+            : task;
+          addTask(project.id, taskWithStatus);
+        }}
       />
 
-      {/* Chat Overlay */}
       {showChat && (
         <ProjectChat 
           projectId={project.id} 

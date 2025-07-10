@@ -8,7 +8,8 @@ import {
   Calendar, 
   BarChart3, 
   Settings,
-  Plus
+  Plus,
+  Search
 } from 'lucide-react';
 import {
   Sidebar,
@@ -28,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { ProfileMenu } from '@/components/ProfileMenu';
 import { useProjects } from '@/hooks/useProjects';
 import { CreateProjectDialog } from '@/components/CreateProjectDialog';
+import { GlobalSearch } from '@/components/GlobalSearch';
 import { useState } from 'react';
 
 const navigationItems = [
@@ -44,6 +46,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { projects } = useProjects();
   const [showCreateProject, setShowCreateProject] = useState(false);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   
   const collapsed = state === "collapsed";
   const currentPath = location.pathname;
@@ -57,6 +60,19 @@ export function AppSidebar() {
     isActive(path) 
       ? "bg-primary text-primary-foreground hover:bg-primary/90" 
       : "hover:bg-accent hover:text-accent-foreground";
+
+  // Handle keyboard shortcut
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowGlobalSearch(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -76,6 +92,19 @@ export function AppSidebar() {
               </div>
             )}
           </div>
+          
+          {/* Global Search */}
+          {!collapsed && (
+            <Button
+              variant="outline"
+              className="w-full justify-start text-muted-foreground mt-3"
+              onClick={() => setShowGlobalSearch(true)}
+            >
+              <Search className="h-4 w-4 mr-2" />
+              Search...
+              <kbd className="ml-auto text-xs bg-muted px-1 rounded">⌘K</kbd>
+            </Button>
+          )}
         </SidebarHeader>
 
         <SidebarContent className="px-2">
@@ -146,9 +175,13 @@ export function AppSidebar() {
         open={showCreateProject}
         onOpenChange={setShowCreateProject}
       />
+      
+      <GlobalSearch
+        open={showGlobalSearch}
+        onOpenChange={setShowGlobalSearch}
+      />
     </>
   );
 }
 
-// Export the component with the correct name expected by AppLayout
 export { AppSidebar as Sidebar };

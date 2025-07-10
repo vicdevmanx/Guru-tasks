@@ -1,12 +1,22 @@
 
 import { useState } from 'react';
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: string;
+  department: string;
+}
+
 export interface Project {
   id: string;
   name: string;
   description?: string;
   createdAt: Date;
   tasks: Task[];
+  assignees: User[];
 }
 
 export interface Task {
@@ -15,7 +25,7 @@ export interface Task {
   description?: string;
   status: 'todo' | 'in-progress' | 'done';
   priority: 'low' | 'medium' | 'high';
-  assignee?: string;
+  assignees: User[];
   createdAt: Date;
   dueDate?: Date;
 }
@@ -28,12 +38,48 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
+const mockUsers: User[] = [
+  {
+    id: '1',
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    avatar: '',
+    role: 'Project Manager',
+    department: 'Engineering'
+  },
+  {
+    id: '2',
+    name: 'Jane Smith',
+    email: 'jane.smith@example.com',
+    avatar: '',
+    role: 'Designer',
+    department: 'Design'
+  },
+  {
+    id: '3',
+    name: 'Mike Johnson',
+    email: 'mike.johnson@example.com',
+    avatar: '',
+    role: 'Developer',
+    department: 'Engineering'
+  },
+  {
+    id: '4',
+    name: 'Sarah Wilson',
+    email: 'sarah.wilson@example.com',
+    avatar: '',
+    role: 'QA Engineer',
+    department: 'Quality Assurance'
+  }
+];
+
 const initialProjects: Project[] = [
   {
     id: '1',
     name: 'Website Redesign',
     description: 'Complete redesign of company website',
     createdAt: new Date(),
+    assignees: [mockUsers[0], mockUsers[1]],
     tasks: [
       {
         id: 'task-1',
@@ -41,6 +87,7 @@ const initialProjects: Project[] = [
         description: 'Create initial design mockups for the homepage',
         status: 'todo',
         priority: 'high',
+        assignees: [mockUsers[1]],
         createdAt: new Date(),
       },
       {
@@ -49,6 +96,7 @@ const initialProjects: Project[] = [
         description: 'Code the new header component',
         status: 'in-progress',
         priority: 'medium',
+        assignees: [mockUsers[2]],
         createdAt: new Date(),
       },
       {
@@ -57,6 +105,7 @@ const initialProjects: Project[] = [
         description: 'Ensure mobile responsiveness',
         status: 'done',
         priority: 'low',
+        assignees: [mockUsers[3]],
         createdAt: new Date(),
       },
     ],
@@ -66,14 +115,16 @@ const initialProjects: Project[] = [
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [users] = useState<User[]>(mockUsers);
 
-  const addProject = (name: string, description?: string) => {
+  const addProject = (name: string, description?: string, assignees: User[] = []) => {
     const newProject: Project = {
       id: Date.now().toString(),
       name,
       description,
       createdAt: new Date(),
       tasks: [],
+      assignees,
     };
     setProjects(prev => [...prev, newProject]);
   };
@@ -180,6 +231,7 @@ export const useProjects = () => {
 
   return {
     projects,
+    users,
     addProject,
     updateProject,
     deleteProject,
