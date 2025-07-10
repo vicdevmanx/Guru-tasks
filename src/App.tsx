@@ -10,7 +10,7 @@ import { Team } from '@/pages/Team';
 import { Analytics } from '@/pages/Analytics';
 import { Calendar } from '@/pages/Calendar';
 import { Settings } from '@/pages/Settings';
-import { NotFound } from '@/pages/NotFound';
+import NotFound from '@/pages/NotFound';
 import './App.css';
 
 function App() {
