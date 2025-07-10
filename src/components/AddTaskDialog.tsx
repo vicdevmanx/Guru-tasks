@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Select,
@@ -20,46 +21,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Check, ChevronsUpDown, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Task, User as UserType, useProjects } from '@/hooks/useProjects';
+import { X, Plus } from 'lucide-react';
+import { Task, User, useProjects } from '@/hooks/useProjects';
 
 interface AddTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
-  projectId?: string;
-  initialStatus?: Task['status'];
 }
 
 export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
   open,
   onOpenChange,
   onAddTask,
-  projectId,
-  initialStatus = 'todo',
 }) => {
   const { users } = useProjects();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    status: initialStatus,
+    status: 'todo' as Task['status'],
     priority: 'medium' as Task['priority'],
-    assignee: null as UserType | null,
+    assignees: [] as User[],
   });
-  const [showAssigneeSelector, setShowAssigneeSelector] = useState(false);
+  const [currentAssignee, setCurrentAssignee] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,22 +54,49 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
       description: formData.description || undefined,
       status: formData.status,
       priority: formData.priority,
-      assignees: formData.assignee ? [formData.assignee] : [],
+      assignees: formData.assignees,
     });
 
     setFormData({
       title: '',
       description: '',
-      status: initialStatus,
+      status: 'todo',
       priority: 'medium',
-      assignee: null,
+      assignees: [],
     });
+    setCurrentAssignee('');
     onOpenChange(false);
   };
 
-  const handleSelectAssignee = (user: UserType) => {
-    setFormData(prev => ({ ...prev, assignee: user }));
-    setShowAssigneeSelector(false);
+  const handleAddAssignee = () => {
+    if (!currentAssignee.trim()) return;
+    
+    const user = users.find(u => 
+      u.name.toLowerCase().includes(currentAssignee.toLowerCase()) ||
+      u.email.toLowerCase().includes(currentAssignee.toLowerCase())
+    );
+    
+    if (user && !formData.assignees.find(a => a.id === user.id)) {
+      setFormData(prev => ({
+        ...prev,
+        assignees: [...prev.assignees, user]
+      }));
+      setCurrentAssignee('');
+    }
+  };
+
+  const handleAssigneeKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddAssignee();
+    }
+  };
+
+  const removeAssignee = (userId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      assignees: prev.assignees.filter(a => a.id !== userId)
+    }));
   };
 
   return (
@@ -162,67 +173,47 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label>Assignee</Label>
-            <Popover open={showAssigneeSelector} onOpenChange={setShowAssigneeSelector}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={showAssigneeSelector}
-                  className="w-full justify-between"
-                >
-                  {formData.assignee ? (
-                    <div className="flex items-center gap-2">
-                      <Avatar className="w-5 h-5">
-                        <AvatarFallback className="text-xs">
-                          {formData.assignee.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      {formData.assignee.name}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <User className="h-4 w-4" />
-                      Select assignee...
-                    </div>
-                  )}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[300px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search team members..." />
-                  <CommandEmpty>No team member found.</CommandEmpty>
-                  <CommandGroup>
-                    {users.map((user) => (
-                      <CommandItem
-                        key={user.id}
-                        onSelect={() => handleSelectAssignee(user)}
-                        className="cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3 w-full">
-                          <Avatar className="w-6 h-6">
-                            <AvatarFallback>
-                              {user.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <p className="font-medium">{user.name}</p>
-                            <p className="text-xs text-muted-foreground">{user.role}</p>
-                          </div>
-                          <Check
-                            className={cn(
-                              "ml-auto h-4 w-4",
-                              formData.assignee?.id === user.id ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <Label htmlFor="assignees">Assignees</Label>
+            <div className="flex gap-2">
+              <Input
+                id="assignees"
+                value={currentAssignee}
+                onChange={(e) => setCurrentAssignee(e.target.value)}
+                onKeyPress={handleAssigneeKeyPress}
+                placeholder="Type name or email and press Enter"
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddAssignee}
+                disabled={!currentAssignee.trim()}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            {formData.assignees.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.assignees.map((user) => (
+                  <Badge key={user.id} variant="secondary" className="flex items-center gap-2 pr-1">
+                    <Avatar className="w-4 h-4">
+                      <AvatarFallback className="text-xs">
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    {user.name}
+                    <button
+                      type="button"
+                      onClick={() => removeAssignee(user.id)}
+                      className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           <DialogFooter>

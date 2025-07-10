@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import { Task } from '@/hooks/useProjects';
 import { TaskMenu } from './TaskMenu';
@@ -73,22 +72,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           )}
         </div>
 
-        {task.assignees && task.assignees.length > 0 && (
+        {task.assignee && (
           <div className="mt-3 flex items-center gap-2">
-            <div className="flex -space-x-1">
-              {task.assignees.slice(0, 3).map((assignee, index) => (
-                <Avatar key={assignee.id} className="h-6 w-6 border-2 border-background">
-                  <AvatarFallback className="text-xs">
-                    {assignee.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {task.assignees.length > 3 && (
-                <div className="h-6 w-6 rounded-full bg-muted border-2 border-background flex items-center justify-center">
-                  <span className="text-xs">+{task.assignees.length - 3}</span>
-                </div>
-              )}
+            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-xs font-medium">
+                {task.assignee.charAt(0).toUpperCase()}
+              </span>
             </div>
+            <span className="text-xs text-muted-foreground">{task.assignee}</span>
           </div>
         )}
       </CardContent>
