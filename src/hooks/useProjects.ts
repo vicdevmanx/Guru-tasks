@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 
 export interface User {
@@ -18,13 +19,11 @@ export interface Project {
   assignees: User[];
 }
 
-export type TaskStatus = 'todo' | 'in-progress' | 'in-review' | 'done';
-
 export interface Task {
   id: string;
   title: string;
   description?: string;
-  status: TaskStatus;
+  status: 'todo' | 'in-progress' | 'done';
   priority: 'low' | 'medium' | 'high';
   assignees: User[];
   createdAt: Date;
@@ -186,7 +185,7 @@ export const useProjects = () => {
     );
   };
 
-  const moveTask = (projectId: string, taskId: string, newStatus: TaskStatus) => {
+  const moveTaskToStatus = (projectId: string, taskId: string, newStatus: Task['status']) => {
     setProjects(prev =>
       prev.map(project =>
         project.id === projectId
@@ -199,10 +198,6 @@ export const useProjects = () => {
           : project
       )
     );
-  };
-
-  const moveTaskToStatus = (projectId: string, taskId: string, newStatus: TaskStatus) => {
-    return moveTask(projectId, taskId, newStatus);
   };
 
   const reorderTasks = (projectId: string, sourceIndex: number, destinationIndex: number) => {
@@ -243,7 +238,6 @@ export const useProjects = () => {
     addTask,
     updateTask,
     deleteTask,
-    moveTask,
     moveTaskToStatus,
     reorderTasks,
     chatMessages,

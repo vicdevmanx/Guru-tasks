@@ -77,18 +77,18 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar 
-        className={`transition-all duration-300 ${collapsed ? 'w-14' : 'w-56'} border-r`}
+        className={`transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
         collapsible="icon"
       >
-        <SidebarHeader className="border-b border-border p-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center flex-shrink-0">
-              <span className="text-primary-foreground font-bold text-xs">PM</span>
+        <SidebarHeader className="border-b border-border p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">PM</span>
             </div>
             {!collapsed && (
-              <div className="min-w-0">
-                <h2 className="font-semibold text-foreground text-sm truncate">Project Manager</h2>
-                <p className="text-xs text-muted-foreground truncate">Team Workspace</p>
+              <div>
+                <h2 className="font-semibold text-foreground">Project Manager</h2>
+                <p className="text-xs text-muted-foreground">Team Workspace</p>
               </div>
             )}
           </div>
@@ -97,26 +97,26 @@ export function AppSidebar() {
           {!collapsed && (
             <Button
               variant="outline"
-              className="w-full justify-start text-muted-foreground mt-3 h-8 text-xs"
+              className="w-full justify-start text-muted-foreground mt-3"
               onClick={() => setShowGlobalSearch(true)}
             >
-              <Search className="h-3 w-3 mr-2" />
+              <Search className="h-4 w-4 mr-2" />
               Search...
               <kbd className="ml-auto text-xs bg-muted px-1 rounded">⌘K</kbd>
             </Button>
           )}
         </SidebarHeader>
 
-        <SidebarContent className="px-2 py-2">
+        <SidebarContent className="px-2">
           <SidebarGroup>
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
+              <SidebarMenu>
                 {navigationItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className="h-8">
+                    <SidebarMenuButton asChild>
                       <Link 
                         to={item.url} 
-                        className={`${getNavClass(item.url)} transition-colors text-sm`}
+                        className={`${getNavClass(item.url)} transition-colors`}
                       >
                         <item.icon className="h-4 w-4" />
                         {!collapsed && <span>{item.title}</span>}
@@ -128,7 +128,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-4">
+          <SidebarGroup>
             <div className="flex items-center justify-between px-2 py-1">
               {!collapsed && (
                 <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -138,24 +138,24 @@ export function AppSidebar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-5 w-5 p-0 hover:bg-accent"
+                className="h-6 w-6 p-0 hover:bg-accent"
                 onClick={() => setShowCreateProject(true)}
               >
                 <Plus className="h-3 w-3" />
               </Button>
             </div>
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
+              <SidebarMenu>
                 {projects.slice(0, 5).map((project) => (
                   <SidebarMenuItem key={project.id}>
-                    <SidebarMenuButton asChild className="h-8">
+                    <SidebarMenuButton asChild>
                       <Link 
                         to={`/project/${project.id}`}
-                        className={`${getNavClass(`/project/${project.id}`)} transition-colors text-sm`}
+                        className={`${getNavClass(`/project/${project.id}`)} transition-colors`}
                       >
-                        <div className="w-3 h-3 rounded bg-primary/20 flex-shrink-0" />
+                        <div className="w-4 h-4 rounded bg-primary/20 flex-shrink-0" />
                         {!collapsed && (
-                          <span className="truncate text-xs">{project.name}</span>
+                          <span className="truncate">{project.name}</span>
                         )}
                       </Link>
                     </SidebarMenuButton>

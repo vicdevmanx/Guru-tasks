@@ -1,3 +1,4 @@
+
 import React, { useState, KeyboardEvent } from 'react';
 import {
   Dialog,
@@ -21,26 +22,24 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { X, Plus } from 'lucide-react';
-import { Task, User, TaskStatus, useProjects } from '@/hooks/useProjects';
+import { Task, User, useProjects } from '@/hooks/useProjects';
 
 interface AddTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectId: string;
-  initialStatus?: TaskStatus;
+  onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
 }
 
 export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
   open,
   onOpenChange,
-  projectId,
-  initialStatus = 'todo',
+  onAddTask,
 }) => {
-  const { users, addTask } = useProjects();
+  const { users } = useProjects();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    status: initialStatus,
+    status: 'todo' as Task['status'],
     priority: 'medium' as Task['priority'],
     assignees: [] as User[],
   });
@@ -50,7 +49,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
     e.preventDefault();
     if (!formData.title.trim()) return;
 
-    addTask(projectId, {
+    onAddTask({
       title: formData.title,
       description: formData.description || undefined,
       status: formData.status,
@@ -61,7 +60,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
     setFormData({
       title: '',
       description: '',
-      status: initialStatus,
+      status: 'todo',
       priority: 'medium',
       assignees: [],
     });
@@ -138,7 +137,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value: TaskStatus) =>
+                onValueChange={(value: Task['status']) =>
                   setFormData(prev => ({ ...prev, status: value }))
                 }
               >
@@ -148,7 +147,6 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
                 <SelectContent>
                   <SelectItem value="todo">To Do</SelectItem>
                   <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="in-review">In Review</SelectItem>
                   <SelectItem value="done">Done</SelectItem>
                 </SelectContent>
               </Select>

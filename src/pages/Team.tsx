@@ -25,13 +25,13 @@ export const Team = () => {
   );
 
   return (
-    <div className="p-4 space-y-6 animate-fade-in max-w-7xl mx-auto">
+    <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Team</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage your team members and their roles</p>
+          <h1 className="text-3xl font-bold text-foreground">Team</h1>
+          <p className="text-muted-foreground">Manage your team members and their roles</p>
         </div>
-        <Button className="gap-2 h-9">
+        <Button className="gap-2">
           <Plus className="h-4 w-4" />
           Invite Member
         </Button>
@@ -45,53 +45,53 @@ export const Team = () => {
             placeholder="Search team members..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9"
+            className="pl-9"
           />
         </div>
       </div>
 
       {/* Team Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUsers.map(user => (
-          <Card key={user.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="text-center pb-3">
-              <div className="flex flex-col items-center space-y-3">
+          <Card key={user.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center pb-4">
+              <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
                   <Avatar className="w-16 h-16 ring-4 ring-border">
-                    <AvatarFallback className="text-base font-bold">
+                    <AvatarFallback className="text-lg font-bold">
                       {user.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
                 </div>
                 <div className="text-center">
-                  <CardTitle className="text-base">{user.name}</CardTitle>
+                  <CardTitle className="text-lg">{user.name}</CardTitle>
                   <p className="text-muted-foreground text-sm">{user.role}</p>
                 </div>
-                <Badge variant="secondary" className="px-2 py-1 text-xs">
+                <Badge variant="secondary" className="px-3 py-1">
                   {user.department}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 pt-0">
+            <CardContent className="space-y-3">
               <div className="flex items-center gap-3 text-sm">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate">{user.email}</span>
               </div>
               
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                    <Mail className="h-3 w-3" />
+                  <Button variant="outline" size="sm">
+                    <Mail className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                    <Phone className="h-3 w-3" />
+                  <Button variant="outline" size="sm">
+                    <Phone className="h-4 w-4" />
                   </Button>
                 </div>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button variant="ghost" size="sm">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -111,9 +111,9 @@ export const Team = () => {
       </div>
 
       {/* Team Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Members</p>
@@ -127,7 +127,7 @@ export const Team = () => {
         </Card>
         
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Departments</p>
@@ -141,7 +141,7 @@ export const Team = () => {
         </Card>
         
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active Now</p>
