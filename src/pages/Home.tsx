@@ -43,15 +43,15 @@ export const Home = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="p-4 space-y-6 animate-fade-in max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening with your projects.</p>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">Welcome back! Here's what's happening with your projects.</p>
         </div>
         <Button 
           onClick={() => setShowCreateProject(true)} 
-          className="gap-2"
+          className="gap-2 h-9"
         >
           <Plus className="h-4 w-4" />
           New Project
@@ -59,35 +59,35 @@ export const Home = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-blue-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
             <Users className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="text-2xl font-bold">{projects.length}</div>
             <p className="text-xs text-muted-foreground">Active projects</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-orange-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
             <Clock className="h-4 w-4 text-orange-500" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="text-2xl font-bold">{pendingTasks}</div>
             <p className="text-xs text-muted-foreground">Tasks in progress</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium">Completed Tasks</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="text-2xl font-bold">{completedTasks}</div>
             <p className="text-xs text-muted-foreground">
               {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}% completion rate
@@ -96,11 +96,11 @@ export const Home = () => {
         </Card>
 
         <Card className="border-l-4 border-l-purple-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium">Productivity</CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-500" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="text-2xl font-bold">+12%</div>
             <p className="text-xs text-muted-foreground">From last month</p>
           </CardContent>
@@ -109,8 +109,8 @@ export const Home = () => {
 
       {/* Projects Grid */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Your Projects</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="text-lg font-semibold mb-4">Your Projects</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map(project => {
             const completionRate = project.tasks.length > 0
               ? (project.tasks.filter(task => task.status === 'done').length / project.tasks.length) * 100
@@ -119,12 +119,12 @@ export const Home = () => {
             return (
               <div key={project.id} className="group relative">
                 <Link to={`/project/${project.id}`}>
-                  <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
-                    <CardHeader>
+                  <Card className="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
+                    <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg line-clamp-1">{project.name}</CardTitle>
-                          <CardDescription className="line-clamp-2 mt-1">
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-base line-clamp-1">{project.name}</CardTitle>
+                          <CardDescription className="line-clamp-2 mt-1 text-sm">
                             {project.description || 'No description provided'}
                           </CardDescription>
                         </div>
@@ -139,7 +139,7 @@ export const Home = () => {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-0">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">{project.tasks.length} tasks</span>
