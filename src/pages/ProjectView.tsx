@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -23,10 +22,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useProjects } from '@/hooks/useProjects';
+import { useProjects, TaskStatus, Task } from '@/hooks/useProjects';
 import { TaskCard } from '@/components/TaskCard';
 import { AddTaskDialog } from '@/components/AddTaskDialog';
-import type { Task, TaskStatus } from '@/hooks/useProjects';
 
 const statusConfig = {
   'todo': { title: 'To Do', color: 'bg-slate-100', count: 0 },
@@ -37,7 +35,7 @@ const statusConfig = {
 
 export const ProjectView = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const { projects, moveTask, addTask } = useProjects();
+  const { projects, moveTask, updateTask, deleteTask } = useProjects();
   const [showAddTask, setShowAddTask] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus>('todo');
   
@@ -56,7 +54,6 @@ export const ProjectView = () => {
     );
   }
 
-  // Calculate task counts
   const taskCounts = project.tasks.reduce((acc, task) => {
     acc[task.status] = (acc[task.status] || 0) + 1;
     return acc;
@@ -94,8 +91,16 @@ export const ProjectView = () => {
     return project.tasks.filter(task => task.status === status);
   };
 
+  const handleUpdateTask = (taskId: string, updates: Partial<Task>) => {
+    updateTask(projectId!, taskId, updates);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    deleteTask(projectId!, taskId);
+  };
+
   return (
-    <div className="p-4 space-y-6 animate-fade-in max-w-7xl mx-auto">
+    <div className="p-6 space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -268,7 +273,11 @@ export const ProjectView = () => {
                                   snapshot.isDragging ? 'rotate-2 scale-105' : ''
                                 } transition-transform`}
                               >
-                                <TaskCard task={task} />
+                                <TaskCard 
+                                  task={task} 
+                                  onUpdateTask={(updates) => handleUpdateTask(task.id, updates)}
+                                  onDeleteTask={() => handleDeleteTask(task.id)}
+                                />
                               </div>
                             )}
                           </Draggable>
