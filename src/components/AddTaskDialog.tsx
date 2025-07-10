@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { X, Plus } from 'lucide-react';
 import { Task } from '@/hooks/useProjects';
 
 interface AddTaskDialogProps {
@@ -37,8 +39,9 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
     description: '',
     status: 'todo' as Task['status'],
     priority: 'medium' as Task['priority'],
-    assignee: '',
+    assignees: [] as string[],
   });
+  const [currentAssignee, setCurrentAssignee] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +52,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
       description: formData.description || undefined,
       status: formData.status,
       priority: formData.priority,
-      assignee: formData.assignee || undefined,
+      assignee: formData.assignees.length > 0 ? formData.assignees.join(', ') : undefined,
     });
 
     setFormData({
@@ -57,9 +60,34 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
       description: '',
       status: 'todo',
       priority: 'medium',
-      assignee: '',
+      assignees: [],
     });
+    setCurrentAssignee('');
     onOpenChange(false);
+  };
+
+  const handleAddAssignee = () => {
+    if (currentAssignee.trim() && !formData.assignees.includes(currentAssignee.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        assignees: [...prev.assignees, currentAssignee.trim()]
+      }));
+      setCurrentAssignee('');
+    }
+  };
+
+  const handleAssigneeKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddAssignee();
+    }
+  };
+
+  const removeAssignee = (assignee: string) => {
+    setFormData(prev => ({
+      ...prev,
+      assignees: prev.assignees.filter(a => a !== assignee)
+    }));
   };
 
   return (
@@ -136,20 +164,51 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="assignee">Assignee</Label>
-            <Input
-              id="assignee"
-              value={formData.assignee}
-              onChange={(e) => setFormData(prev => ({ ...prev, assignee: e.target.value }))}
-              placeholder="Enter assignee name"
-            />
+            <Label htmlFor="assignees">Assignees</Label>
+            <div className="flex gap-2">
+              <Input
+                id="assignees"
+                value={currentAssignee}
+                onChange={(e) => setCurrentAssignee(e.target.value)}
+                onKeyPress={handleAssigneeKeyPress}
+                placeholder="Type name and press Enter"
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddAssignee}
+                disabled={!currentAssignee.trim()}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            {formData.assignees.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.assignees.map((assignee, index) => (
+                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    {assignee}
+                    <button
+                      type="button"
+                      onClick={() => removeAssignee(assignee)}
+                      className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Add Task</Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              Add Task
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

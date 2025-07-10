@@ -1,113 +1,151 @@
 
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { Home, User, FolderKanban, Plus } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  Home, 
+  FolderKanban, 
+  Users, 
+  Calendar, 
+  BarChart3, 
+  Settings,
+  Plus
+} from 'lucide-react';
 import {
-  Sidebar as SidebarUI,
+  Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
-  SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { ProfileMenu } from '@/components/ProfileMenu';
 import { useProjects } from '@/hooks/useProjects';
-import { ProfileMenu } from '../ProfileMenu';
+import { CreateProjectDialog } from '@/components/CreateProjectDialog';
+import { useState } from 'react';
 
-export const Sidebar = () => {
+const navigationItems = [
+  { title: 'Dashboard', url: '/', icon: Home },
+  { title: 'Projects', url: '/projects', icon: FolderKanban },
+  { title: 'Team', url: '/team', icon: Users },
+  { title: 'Calendar', url: '/calendar', icon: Calendar },
+  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
+  { title: 'Settings', url: '/settings', icon: Settings },
+];
+
+export function AppSidebar() {
   const { state } = useSidebar();
-  const collapsed = state === 'collapsed';
   const location = useLocation();
-  const { projects, addProject } = useProjects();
+  const { projects } = useProjects();
+  const [showCreateProject, setShowCreateProject] = useState(false);
+  
+  const collapsed = state === "collapsed";
+  const currentPath = location.pathname;
 
-  const mainItems = [
-    { title: 'Home', url: '/', icon: Home },
-    { title: 'Profile', url: '/profile', icon: User },
-  ];
-
-  const handleAddProject = () => {
-    const name = prompt('Enter project name:');
-    if (name?.trim()) {
-      addProject(name.trim());
-    }
+  const isActive = (path: string) => {
+    if (path === '/') return currentPath === '/';
+    return currentPath.startsWith(path);
   };
 
-  return (
-    <SidebarUI className={collapsed ? 'w-14' : 'w-64'} collapsible="icon">
-      <SidebarTrigger className="m-2 self-end" />
-      
-      <SidebarContent className="bg-card border-r">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground">Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={collapsed ? item.title : undefined}>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-accent hover:text-accent-foreground'
-                      }
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+  const getNavClass = (path: string) =>
+    isActive(path) 
+      ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+      : "hover:bg-accent hover:text-accent-foreground";
 
-        <SidebarGroup>
-          <div className="flex items-center justify-between">
-            <SidebarGroupLabel className="text-muted-foreground">Projects</SidebarGroupLabel>
+  return (
+    <>
+      <Sidebar 
+        className={`transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
+        collapsible="icon"
+      >
+        <SidebarHeader className="border-b border-border p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">PM</span>
+            </div>
             {!collapsed && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleAddProject}
-                className="h-6 w-6 p-0"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
+              <div>
+                <h2 className="font-semibold text-foreground">Project Manager</h2>
+                <p className="text-xs text-muted-foreground">Team Workspace</p>
+              </div>
             )}
           </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {projects.map((project) => (
-                <SidebarMenuItem key={project.id}>
-                  <SidebarMenuButton asChild tooltip={collapsed ? project.name : undefined}>
-                    <NavLink
-                      to={`/project/${project.id}`}
-                      className={({ isActive }) =>
-                        isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-accent hover:text-accent-foreground'
-                      }
-                    >
-                      <FolderKanban className="h-4 w-4" />
-                      {!collapsed && <span>{project.name}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+        </SidebarHeader>
 
-      <SidebarFooter>
-        <ProfileMenu collapsed={collapsed} />
-      </SidebarFooter>
-    </SidebarUI>
+        <SidebarContent className="px-2">
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navigationItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link 
+                        to={item.url} 
+                        className={`${getNavClass(item.url)} transition-colors`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <div className="flex items-center justify-between px-2 py-1">
+              {!collapsed && (
+                <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Projects
+                </SidebarGroupLabel>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-accent"
+                onClick={() => setShowCreateProject(true)}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {projects.slice(0, 5).map((project) => (
+                  <SidebarMenuItem key={project.id}>
+                    <SidebarMenuButton asChild>
+                      <Link 
+                        to={`/project/${project.id}`}
+                        className={`${getNavClass(`/project/${project.id}`)} transition-colors`}
+                      >
+                        <div className="w-4 h-4 rounded bg-primary/20 flex-shrink-0" />
+                        {!collapsed && (
+                          <span className="truncate">{project.name}</span>
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter className="border-t border-border p-2">
+          <ProfileMenu collapsed={collapsed} />
+        </SidebarFooter>
+      </Sidebar>
+
+      <CreateProjectDialog
+        open={showCreateProject}
+        onOpenChange={setShowCreateProject}
+      />
+    </>
   );
-};
+}
