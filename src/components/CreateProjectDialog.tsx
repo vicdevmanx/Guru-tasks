@@ -1,5 +1,5 @@
 
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useNavigate } from 'react-router-dom';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
   onOpenChange,
 }) => {
   const { addProject, users } = useProjects();
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [assignees, setAssignees] = useState<User[]>([]);
@@ -41,11 +43,16 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
     e.preventDefault();
     if (!name.trim()) return;
 
-    addProject(name.trim(), description.trim() || undefined, assignees);
+    const projectId = addProject(name.trim(), description.trim() || undefined, assignees);
     setName('');
     setDescription('');
     setAssignees([]);
     onOpenChange(false);
+    
+    // Navigate to the newly created project
+    if (projectId) {
+      navigate(`/project/${projectId}`);
+    }
   };
 
   const handleAddAssignee = (user: User) => {
@@ -102,6 +109,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
             <Popover open={showUserSelector} onOpenChange={setShowUserSelector}>
               <PopoverTrigger asChild>
                 <Button
+                  type="button"
                   variant="outline"
                   className="w-full justify-start text-muted-foreground"
                 >
