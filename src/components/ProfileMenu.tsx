@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { User, Settings, LogOut, Palette, Shield, HelpCircle } from 'lucide-react';
 import {
   DropdownMenu,
@@ -23,6 +24,11 @@ interface ProfileMenuProps {
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({ collapsed }) => {
   const userName = "John Doe";
   const userEmail = "john.doe@example.com";
+
+  const handleLogout = () => {
+    // Add logout logic here
+    console.log('Logging out...');
+  };
 
   return (
     <DropdownMenu>
@@ -67,14 +73,18 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ collapsed }) => {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem className="cursor-pointer">
-          <User className="mr-2 h-4 w-4" />
-          View Profile
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/profile">
+            <User className="mr-2 h-4 w-4" />
+            View Profile
+          </Link>
         </DropdownMenuItem>
         
-        <DropdownMenuItem className="cursor-pointer">
-          <Settings className="mr-2 h-4 w-4" />
-          Account Settings
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/settings">
+            <Settings className="mr-2 h-4 w-4" />
+            Account Settings
+          </Link>
         </DropdownMenuItem>
 
         <DropdownMenuSub>
@@ -101,7 +111,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ collapsed }) => {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
           Log Out
         </DropdownMenuItem>

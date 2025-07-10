@@ -10,7 +10,7 @@ import { Team } from '@/pages/Team';
 import { Analytics } from '@/pages/Analytics';
 import { Calendar } from '@/pages/Calendar';
 import { Settings } from '@/pages/Settings';
-import { NotFound } from '@/pages/NotFound';
+import NotFound from '@/pages/NotFound';
 import './App.css';
 
 function App() {
@@ -21,6 +21,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="projects" element={<Projects />} />
           <Route path="project/:projectId" element={<ProjectView />} />
+          <Route path="project/:projectId/overview" element={<ProjectView />} />
           <Route path="team" element={<Team />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="calendar" element={<Calendar />} />
