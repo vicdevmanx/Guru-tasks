@@ -149,3 +149,6 @@ export function AppSidebar() {
     </>
   );
 }
+
+// Export the component with the correct name expected by AppLayout
+export { AppSidebar as Sidebar };
