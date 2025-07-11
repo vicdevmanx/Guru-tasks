@@ -136,8 +136,8 @@ export const Signup = () => {
       </div>
 
       <div className="w-full max-w-md">
-        <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="space-y-4 text-center pb-6">
+        <Card className=" border-0 bg-card/50 pt-4 backdrop-blur-sm">
+          {/* <CardHeader className="space-y-4 text-center pb-6">
             <div className="flex justify-center mb-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
@@ -152,7 +152,7 @@ export const Signup = () => {
             <CardDescription className="text-base text-muted-foreground">
               Join us and start collaborating on amazing projects
             </CardDescription>
-          </CardHeader>
+          </CardHeader> */}
           
           <CardContent className="space-y-6">
             <Form {...form}>
