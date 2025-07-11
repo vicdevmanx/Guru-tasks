@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,22 +7,22 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Clock, Users, MessageSquare, Plus, MoreHorizontal, ArrowLeft } from 'lucide-react';
-import { useProjects } from '@/hooks/useProjects';
+import { useProjects, Task as ProjectTask, User } from '@/hooks/useProjects';
 import { TaskCard } from '@/components/TaskCard';
 import { AddTaskDialog } from '@/components/AddTaskDialog';
 import { ProjectChat } from '@/components/ProjectChat';
 import { EditProjectDialog } from '@/components/EditProjectDialog';
 import { ProjectMenu } from '@/components/ProjectMenu';
 
-// Local Task type to match the expected format
+// Local Task type to match the expected format for TaskCard
 interface Task {
   id: string;
   title: string;
   description: string;
   status: 'todo' | 'in-progress' | 'done';
   priority: 'low' | 'medium' | 'high';
-  assigneeId?: string;
-  dueDate: string; // string format for consistency
+  assignees?: User[];
+  dueDate?: string; // string format for consistency
   createdAt: string;
   updatedAt: string;
 }
@@ -41,27 +40,29 @@ export const ProjectView = () => {
 
   // Convert project tasks to local Task format
   const tasks: Task[] = project?.tasks?.map(task => ({
-    ...task,
-    dueDate: task.dueDate instanceof Date ? task.dueDate.toISOString() : task.dueDate,
-    updatedAt: task.updatedAt || new Date().toISOString()
+    id: task.id,
+    title: task.title,
+    description: task.description || '',
+    status: task.status,
+    priority: task.priority,
+    assignees: task.assignees,
+    dueDate: task.dueDate instanceof Date ? task.dueDate.toISOString() : task.dueDate?.toISOString(),
+    createdAt: task.createdAt instanceof Date ? task.createdAt.toISOString() : task.createdAt.toString(),
+    updatedAt: new Date().toISOString()
   })) || [];
 
-  const handleAddTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleAddTask = (taskData: Omit<ProjectTask, 'id' | 'createdAt'>) => {
     if (!project) return;
 
-    const newTask: Task = {
+    const newTask: ProjectTask = {
       ...taskData,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
 
     const updatedProject = {
       ...project,
-      tasks: [...(project.tasks || []), {
-        ...newTask,
-        dueDate: new Date(newTask.dueDate) // Convert back to Date for storage
-      }]
+      tasks: [...(project.tasks || []), newTask]
     };
 
     updateProject(project.id, updatedProject);
