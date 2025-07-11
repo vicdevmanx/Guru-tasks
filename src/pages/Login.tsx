@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 045b677196039107e91927df0d401a3b92d251f9
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -86,26 +82,16 @@ export const Login = () => {
       </div>
 
       <div className="w-full max-w-md">
-<<<<<<< HEAD
-        <Card className=" border-0 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="space-y-4 text-center pb-8">
-            {/* <div className="flex justify-center mb-6">
-=======
         <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-sm">
           <CardHeader className="space-y-4 text-center pb-8">
             <div className="flex justify-center mb-6">
->>>>>>> 045b677196039107e91927df0d401a3b92d251f9
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
                 <div className="relative p-4 rounded-full bg-gradient-to-br from-primary to-primary/80">
                   <LogIn className="h-8 w-8 text-primary-foreground" />
                 </div>
               </div>
-<<<<<<< HEAD
-            </div> */}
-=======
             </div>
->>>>>>> 045b677196039107e91927df0d401a3b92d251f9
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
               Welcome back
             </CardTitle>
