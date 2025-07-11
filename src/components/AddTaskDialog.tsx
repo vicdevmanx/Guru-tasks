@@ -1,4 +1,3 @@
-
 import React, { useState, KeyboardEvent } from 'react';
 import {
   Dialog,
@@ -27,7 +26,7 @@ import { Task, User, useProjects } from '@/hooks/useProjects';
 interface AddTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
 }
 
 export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
@@ -51,7 +50,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
 
     onAddTask({
       title: formData.title,
-      description: formData.description || undefined,
+      description: formData.description,
       status: formData.status,
       priority: formData.priority,
       assignees: formData.assignees,

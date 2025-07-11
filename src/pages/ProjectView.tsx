@@ -35,13 +35,15 @@ export const ProjectView = () => {
   const [showAddTask, setShowAddTask] = useState(false);
   const [showEditProject, setShowEditProject] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showChat, setShowChat] = useState(false);
 
   const project = projects.find(p => p.id === projectId);
 
   // Convert project tasks to local Task format
   const tasks: Task[] = project?.tasks?.map(task => ({
     ...task,
-    dueDate: task.dueDate instanceof Date ? task.dueDate.toISOString() : task.dueDate
+    dueDate: task.dueDate instanceof Date ? task.dueDate.toISOString() : task.dueDate,
+    updatedAt: task.updatedAt || new Date().toISOString()
   })) || [];
 
   const handleAddTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -62,7 +64,28 @@ export const ProjectView = () => {
       }]
     };
 
-    updateProject(updatedProject);
+    updateProject(project.id, updatedProject);
+  };
+
+  const handleDeleteProject = () => {
+    if (project) {
+      // Add delete logic here
+      console.log('Delete project:', project.id);
+    }
+  };
+
+  const handleDuplicateProject = () => {
+    if (project) {
+      // Add duplicate logic here
+      console.log('Duplicate project:', project.id);
+    }
+  };
+
+  const handleArchiveProject = () => {
+    if (project) {
+      // Add archive logic here
+      console.log('Archive project:', project.id);
+    }
   };
 
   if (!project) {
@@ -110,6 +133,9 @@ export const ProjectView = () => {
           <ProjectMenu
             project={project}
             onEdit={() => setShowEditProject(true)}
+            onDelete={handleDeleteProject}
+            onDuplicate={handleDuplicateProject}
+            onArchive={handleArchiveProject}
           />
         </div>
       </div>
@@ -150,7 +176,7 @@ export const ProjectView = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{project.teamMembers?.length || 0}</div>
+            <div className="text-2xl font-bold">{project.assignees?.length || 0}</div>
             <p className="text-xs text-muted-foreground">Active members</p>
           </CardContent>
         </Card>
@@ -162,7 +188,7 @@ export const ProjectView = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'No date'}
+              {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'No date'}
             </div>
             <p className="text-xs text-muted-foreground">Project deadline</p>
           </CardContent>
@@ -231,7 +257,7 @@ export const ProjectView = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {project.teamMembers?.map((member) => (
+                    {project.assignees?.map((member) => (
                       <div key={member.id} className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={member.avatar} />
@@ -298,7 +324,7 @@ export const ProjectView = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {project.teamMembers?.map((member) => (
+                {project.assignees?.map((member) => (
                   <Card key={member.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
@@ -320,7 +346,7 @@ export const ProjectView = () => {
         </TabsContent>
 
         <TabsContent value="chat">
-          <ProjectChat projectId={project.id} />
+          <ProjectChat projectId={project.id} onClose={() => setShowChat(false)} />
         </TabsContent>
       </Tabs>
 
@@ -328,7 +354,6 @@ export const ProjectView = () => {
         open={showAddTask}
         onOpenChange={setShowAddTask}
         onAddTask={handleAddTask}
-        projectId={project.id}
       />
 
       <EditProjectDialog
