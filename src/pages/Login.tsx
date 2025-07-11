@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +10,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, Mail, Lock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -76,37 +76,48 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md">
-        <Card className="shadow-lg">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 rounded-full bg-primary/10">
-                <LogIn className="h-8 w-8 text-primary" />
+        <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="space-y-4 text-center pb-8">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                <div className="relative p-4 rounded-full bg-gradient-to-br from-primary to-primary/80">
+                  <LogIn className="h-8 w-8 text-primary-foreground" />
+                </div>
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-            <CardDescription>
-              Enter your credentials to access your account
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+              Welcome back
+            </CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
+              Sign in to your account to continue
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          
+          <CardContent className="space-y-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-sm font-medium">Email Address</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
                             type="email"
                             placeholder="Enter your email"
-                            className="pl-10"
+                            className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all duration-200"
                             disabled={isLoading}
                           />
                         </div>
@@ -121,22 +132,22 @@ export const Login = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-sm font-medium">Password</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
                             type={showPassword ? 'text' : 'password'}
                             placeholder="Enter your password"
-                            className="pl-10 pr-10"
+                            className="pl-10 pr-12 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all duration-200"
                             disabled={isLoading}
                           />
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             disabled={isLoading}
                           >
@@ -155,12 +166,12 @@ export const Login = () => {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-12 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-lg hover:shadow-xl transition-all duration-200"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
                       Signing in...
                     </div>
                   ) : (
@@ -170,14 +181,14 @@ export const Login = () => {
               </form>
             </Form>
 
-            <div className="mt-6 text-center">
+            <div className="text-center pt-4 border-t border-border/20">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{' '}
                 <Link
                   to="/signup"
-                  className="font-medium text-primary hover:underline"
+                  className="font-medium text-primary hover:text-primary/80 transition-colors duration-200"
                 >
-                  Sign up
+                  Create account
                 </Link>
               </p>
             </div>

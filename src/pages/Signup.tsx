@@ -3,16 +3,16 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, UserPlus, Mail, Lock, User, Briefcase, Camera } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Mail, Lock, User, Briefcase, Camera, Upload } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -52,6 +52,26 @@ export const Signup = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
       form.setValue('profilePicture', file);
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -110,36 +130,52 @@ export const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md">
-        <Card className="shadow-lg">
-          <CardHeader className="space-y-1 text-center">
+        <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="space-y-4 text-center pb-6">
             <div className="flex justify-center mb-4">
-              <div className="p-3 rounded-full bg-primary/10">
-                <UserPlus className="h-8 w-8 text-primary" />
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                <div className="relative p-4 rounded-full bg-gradient-to-br from-primary to-primary/80">
+                  <UserPlus className="h-8 w-8 text-primary-foreground" />
+                </div>
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+              Create account
+            </CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
               Join us and start collaborating on amazing projects
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          
+          <CardContent className="space-y-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 {/* Profile Picture Upload */}
-                <div className="flex flex-col items-center space-y-2">
-                  <Avatar className="h-20 w-20">
-                    {profilePreview ? (
-                      <AvatarImage src={profilePreview} alt="Profile preview" />
-                    ) : (
-                      <AvatarFallback>
-                        <Camera className="h-8 w-8 text-muted-foreground" />
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <Label htmlFor="profile-picture" className="cursor-pointer">
-                    <div className="flex items-center gap-2 text-sm text-primary hover:underline">
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="relative group">
+                    <Avatar className="h-24 w-24 border-4 border-primary/20">
+                      {profilePreview ? (
+                        <AvatarImage src={profilePreview} alt="Profile preview" className="object-cover" />
+                      ) : (
+                        <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5">
+                          <Camera className="h-8 w-8 text-muted-foreground" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                      <Upload className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <label htmlFor="profile-picture" className="cursor-pointer">
+                    <div className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors duration-200 font-medium">
                       <Camera className="h-4 w-4" />
                       Upload profile picture
                     </div>
@@ -150,7 +186,7 @@ export const Signup = () => {
                       onChange={handleFileChange}
                       className="hidden"
                     />
-                  </Label>
+                  </label>
                 </div>
 
                 <FormField
@@ -158,14 +194,14 @@ export const Signup = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel className="text-sm font-medium">Full Name</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
                             placeholder="Enter your full name"
-                            className="pl-10"
+                            className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all duration-200"
                             disabled={isLoading}
                           />
                         </div>
@@ -180,15 +216,15 @@ export const Signup = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-sm font-medium">Email Address</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
                             type="email"
                             placeholder="Enter your email"
-                            className="pl-10"
+                            className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all duration-200"
                             disabled={isLoading}
                           />
                         </div>
@@ -203,12 +239,12 @@ export const Signup = () => {
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Role</FormLabel>
+                      <FormLabel className="text-sm font-medium">Role</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <div className="relative">
-                            <Briefcase className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                            <SelectTrigger className="pl-10">
+                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                            <SelectTrigger className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all duration-200">
                               <SelectValue placeholder="Select your role" />
                             </SelectTrigger>
                           </div>
@@ -231,22 +267,22 @@ export const Signup = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-sm font-medium">Password</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
                             type={showPassword ? 'text' : 'password'}
                             placeholder="Create a password"
-                            className="pl-10 pr-10"
+                            className="pl-10 pr-12 h-12 bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background transition-all duration-200"
                             disabled={isLoading}
                           />
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             disabled={isLoading}
                           >
@@ -265,12 +301,12 @@ export const Signup = () => {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-12 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-lg hover:shadow-xl transition-all duration-200"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
                       Creating account...
                     </div>
                   ) : (
@@ -280,12 +316,12 @@ export const Signup = () => {
               </form>
             </Form>
 
-            <div className="mt-6 text-center">
+            <div className="text-center pt-4 border-t border-border/20">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{' '}
                 <Link
                   to="/login"
-                  className="font-medium text-primary hover:underline"
+                  className="font-medium text-primary hover:text-primary/80 transition-colors duration-200"
                 >
                   Sign in
                 </Link>
