@@ -22,7 +22,7 @@ export interface Task {
   id: string;
   title: string;
   description?: string;
-  status: 'todo' | 'in-progress' | 'done';
+  status: string;
   priority: 'low' | 'medium' | 'high';
   assignees: User[];
   createdAt: Date;
@@ -107,8 +107,64 @@ const initialProjects: Project[] = [
         assignees: [mockUsers[3]],
         createdAt: new Date(),
       },
+       {
+        id: 'task-4',
+        title: 'Test on mobile',
+        description: 'Ensure mobile responsiveness',
+        status: 'review',
+        priority: 'low',
+        assignees: [mockUsers[3]],
+        createdAt: new Date(),
+      },
     ],
   },
+
+   {
+    id: '2',
+    name: 'Guru Task system',
+    description: 'Complete redesign of company website',
+    createdAt: new Date(),
+    assignees: [mockUsers[0], mockUsers[1]],
+    tasks: [
+      {
+        id: 'task-1',
+        title: 'Design mockups',
+        description: 'Create initial design mockups for the homepage',
+        status: 'todo',
+        priority: 'high',
+        assignees: [mockUsers[1]],
+        createdAt: new Date(),
+      },
+      {
+        id: 'task-2',
+        title: 'Implement header',
+        description: 'Code the new header component',
+        status: 'in-progress',
+        priority: 'medium',
+        assignees: [mockUsers[2]],
+        createdAt: new Date(),
+      },
+      {
+        id: 'task-3',
+        title: 'Test on mobile',
+        description: 'Ensure mobile responsiveness',
+        status: 'done',
+        priority: 'low',
+        assignees: [mockUsers[3]],
+        createdAt: new Date(),
+      },
+       {
+        id: 'task-4',
+        title: 'Test on mobile',
+        description: 'Ensure mobile responsiveness',
+        status: 'review',
+        priority: 'low',
+        assignees: [mockUsers[3]],
+        createdAt: new Date(),
+      },
+    ],
+  },
+  
 ];
 
 export const useProjects = () => {

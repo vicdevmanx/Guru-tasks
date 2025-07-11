@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -82,13 +81,14 @@ export function AppSidebar() {
       >
         <SidebarHeader className="border-b border-border p-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">PM</span>
-            </div>
-            {!collapsed && (
+            {/* <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">GT</span>
+            </div> */}
+
+           🎯 {!collapsed && (
               <div>
-                <h2 className="font-semibold text-foreground">Project Manager</h2>
-                <p className="text-xs text-muted-foreground">Team Workspace</p>
+                <h2 className="font-bold text-foreground">Guru Tasks</h2>
+                <p className="text-xs text-muted-foreground -mt-1">Team Workspace</p>
               </div>
             )}
           </div>

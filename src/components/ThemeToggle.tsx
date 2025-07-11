@@ -2,15 +2,15 @@
 import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/hooks/useTheme';
 
 export const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="flex items-center justify-between w-full">
-      <span className="text-sm">Theme</span>
-      <div className="flex items-center space-x-1">
+    <div className="flex gap-2">
+      {/* <span className="text-sm">Theme</span> */}
+       <div className='items-center text-sm flex gap-2'> 
         <Button
           variant={theme === 'light' ? 'default' : 'ghost'}
           size="sm"
@@ -19,6 +19,8 @@ export const ThemeToggle = () => {
         >
           <Sun className="h-4 w-4" />
         </Button>
+</div>
+ <div className='items-center text-sm flex gap-2'> 
         <Button
           variant={theme === 'dark' ? 'default' : 'ghost'}
           size="sm"
@@ -27,7 +29,7 @@ export const ThemeToggle = () => {
         >
           <Moon className="h-4 w-4" />
         </Button>
-      </div>
+        </div>
     </div>
   );
 };
