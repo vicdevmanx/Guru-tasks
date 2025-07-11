@@ -46,8 +46,8 @@ export const ProjectView = () => {
     status: task.status,
     priority: task.priority,
     assignees: task.assignees,
-    dueDate: task.dueDate instanceof Date ? task.dueDate.toISOString() : task.dueDate?.toISOString(),
-    createdAt: task.createdAt instanceof Date ? task.createdAt.toISOString() : task.createdAt.toString(),
+    dueDate: task.dueDate ? task.dueDate.toISOString() : undefined,
+    createdAt: task.createdAt.toISOString(),
     updatedAt: new Date().toISOString()
   })) || [];
 
