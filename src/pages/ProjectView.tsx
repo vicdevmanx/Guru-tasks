@@ -1,315 +1,317 @@
-import React, { useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "@hello-pangea/dnd";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  MessageCircle,
-  MoreHorizontal,
-  Filter,
-  Search,
-  Users,
-  BarChart3,
-  Calendar,
-} from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useProjects } from "@/hooks/useProjects";
-import { TaskCard } from "@/components/TaskCard";
-import { AddTaskDialog } from "@/components/AddTaskDialog";
-import { ProjectChat } from "@/components/ProjectChat";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Calendar, Clock, Users, MessageSquare, Plus, MoreHorizontal, ArrowLeft } from 'lucide-react';
+import { useProjects, Task as ProjectTask, User } from '@/hooks/useProjects';
+import { TaskCard } from '@/components/TaskCard';
+import { AddTaskDialog } from '@/components/AddTaskDialog';
+import { ProjectChat } from '@/components/ProjectChat';
+import { EditProjectDialog } from '@/components/EditProjectDialog';
+import { ProjectMenu } from '@/components/ProjectMenu';
+
+// Local Task type to match the expected format for TaskCard
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  status: 'todo' | 'in-progress' | 'done';
+  priority: 'low' | 'medium' | 'high';
+  assignees?: User[];
+  dueDate?: string; // string format for consistency
+  createdAt: string;
+  updatedAt: string;
+}
 
 export const ProjectView = () => {
-  const { projectId } = useParams<{ projectId: string }>();
-  const { projects, moveTaskToStatus, addTask, updateTask, deleteTask } =
-    useProjects();
+  const { projectId } = useParams();
+  const navigate = useNavigate();
+  const { projects, updateProject } = useProjects();
   const [showAddTask, setShowAddTask] = useState(false);
+  const [showEditProject, setShowEditProject] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
   const [showChat, setShowChat] = useState(false);
-  const [activeColumn, setActiveColumn] = useState<string | null>(null);
-  const [showOverview, setShowOverview] = useState(true);
 
-  const project = projects.find((p) => p.id === projectId);
+  const project = projects.find(p => p.id === projectId);
 
-  if (!project) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-screen animate-fade-in">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">
-            Project not found
-          </h1>
-          <p className="text-muted-foreground">
-            The project you're looking for doesn't exist.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Convert project tasks to local Task format
+  const tasks: Task[] = project?.tasks?.map(task => ({
+    id: task.id,
+    title: task.title,
+    description: task.description || '',
+    status: task.status,
+    priority: task.priority,
+    assignees: task.assignees,
+    dueDate: task.dueDate ? task.dueDate.toISOString() : undefined,
+    createdAt: task.createdAt.toISOString(),
+    updatedAt: new Date().toISOString()
+  })) || [];
 
-const boardRef = useRef<HTMLDivElement>(null);
-const [isPanning, setIsPanning] = useState(false);
-const [startX, setStartX] = useState(0);
-const [scrollLeft, setScrollLeft] = useState(0);
+  const handleAddTask = (taskData: Omit<ProjectTask, 'id' | 'createdAt'>) => {
+    if (!project) return;
 
-const handleMouseDown = (e: React.MouseEvent) => {
-  if (!(e.nativeEvent instanceof MouseEvent) || !e.nativeEvent.getModifierState("Space")) return;
-  setIsPanning(true);
-  setStartX(e.pageX - (boardRef.current?.offsetLeft || 0));
-  setScrollLeft(boardRef.current?.scrollLeft || 0);
-};
+    const newTask: ProjectTask = {
+      ...taskData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+    };
 
-// const handleMouseLeave = () => setIsPanning(false);
-// const handleMouseUp = () => setIsPanning(false);
+    const updatedProject = {
+      ...project,
+      tasks: [...(project.tasks || []), newTask]
+    };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-  if (!isPanning || isDraggingTask) return;
-  e.preventDefault();
-  const x = e.pageX - (boardRef.current?.offsetLeft || 0);
-  const walk = (x - startX) * 1;
-  if (boardRef.current) {
-    boardRef.current.scrollLeft = scrollLeft - walk;
-  }
-};
+    updateProject(project.id, updatedProject);
+  };
 
-const handleMouseUp = () => setIsPanning(false);
-const handleMouseLeave = () => setIsPanning(false);
-
-  const [isDraggingTask, setIsDraggingTask] = useState(false);
-
-const onDragStart = () => {
-  setIsDraggingTask(true);
-  document.body.style.overflow = "hidden";
-};
-
-const onDragEnd = (result: DropResult) => {
-  setIsDraggingTask(false);
-  document.body.style.overflow = "";
-
-    if (!result.destination) return;
-
-    const sourceStatus = result.source.droppableId as
-      | "todo"
-      | "in-progress"
-      | "done";
-    const destinationStatus = result.destination.droppableId as
-      | "todo"
-      | "in-progress"
-      | "done";
-
-    if (sourceStatus !== destinationStatus) {
-      moveTaskToStatus(project.id, result.draggableId, destinationStatus);
+  const handleDeleteProject = () => {
+    if (project) {
+      // Add delete logic here
+      console.log('Delete project:', project.id);
     }
   };
 
+  const handleDuplicateProject = () => {
+    if (project) {
+      // Add duplicate logic here
+      console.log('Duplicate project:', project.id);
+    }
+  };
 
-//   const handleMouseMove = (e: React.MouseEvent) => {
-//   if (!isPanning || isDraggingTask) return;
-//   e.preventDefault();
-//   const x = e.pageX - (boardRef.current?.offsetLeft || 0);
-//   const walk = (x - startX) * 1;
-//   if (boardRef.current) {
-//     boardRef.current.scrollLeft = scrollLeft - walk;
-//   }
-// };
+  const handleArchiveProject = () => {
+    if (project) {
+      // Add archive logic here
+      console.log('Archive project:', project.id);
+    }
+  };
 
-// const handleMouseUp = () => setIsPanning(false);
-// const handleMouseLeave = () => setIsPanning(false);
-
-
-  const todoTasks = project.tasks.filter((task) => task.status === "todo");
-  const inProgressTasks = project.tasks.filter(
-    (task) => task.status === "in-progress"
-  );
-  const doneTasks = project.tasks.filter((task) => task.status === "done");
-   const reviewTasks = project.tasks.filter((task) => task.status === "review");
-
-  const statusColumns = [
-    {
-      id: "todo",
-      title: "TO DO",
-      tasks: todoTasks,
-      count: todoTasks.length,
-    },
-    {
-      id: "in-progress",
-      title: "IN PROGRESS",
-      tasks: inProgressTasks,
-      count: inProgressTasks.length,
-    },
-    {
-      id: "review",
-      title: "REVIEW",
-      tasks: reviewTasks,
-      count: reviewTasks.length,
-    },
-    {
-      id: "done",
-      title: "COMPLETE",
-      tasks: doneTasks,
-      count: doneTasks.length,
-    },
-  ];
-
-  const totalTasks = project.tasks.length;
-  const completedTasks = project.tasks.filter(
-    (task) => task.status === "done"
-  ).length;
-  const pendingTasks = totalTasks - completedTasks;
-  const completionRate =
-    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
-  if (showOverview) {
+  if (!project) {
     return (
-      <div className="p-6 space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {project.name} Overview
-            </h1>
-            <p className="text-muted-foreground">{project.description}</p>
-          </div>
-          <Button onClick={() => setShowOverview(false)} variant="outline">
-            Back to Board
+      <div className="container mx-auto py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Project not found</h1>
+          <Button onClick={() => navigate('/projects')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Projects
           </Button>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-              <Users className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalTasks}</div>
-              <p className="text-xs text-muted-foreground">Tasks in project</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-orange-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <Calendar className="h-4 w-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{pendingTasks}</div>
-              <p className="text-xs text-muted-foreground">Tasks in progress</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completed</CardTitle>
-              <BarChart3 className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{completedTasks}</div>
-              <p className="text-xs text-muted-foreground">
-                {completionRate}% completion rate
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-purple-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Team Members
-              </CardTitle>
-              <Users className="h-4 w-4 text-purple-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {project.assignees.length}
-              </div>
-              <p className="text-xs text-muted-foreground">Active members</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Team Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Team Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {project.assignees.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent"
-                >
-                  <Avatar>
-                    <AvatarFallback>
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </div>
-                  <Badge variant="secondary">{user.role}</Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
+  const todoTasks = tasks.filter(task => task.status === 'todo');
+  const inProgressTasks = tasks.filter(task => task.status === 'in-progress');
+  const doneTasks = tasks.filter(task => task.status === 'done');
+
+  const completionPercentage = tasks.length > 0 ? Math.round((doneTasks.length / tasks.length) * 100) : 0;
+
   return (
-    <div className="relative h-screen flex flex-col overflow-hidden bg-background">
-      {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-border bg-background">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">
-                {project.name}
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                {project.description}
-              </p>
+    <div className="container mx-auto py-6 space-y-6">
+      {/* Project Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/projects')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">{project.name}</h1>
+            <p className="text-muted-foreground">{project.description}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setShowAddTask(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Task
+          </Button>
+          <ProjectMenu
+            project={project}
+            onEdit={() => setShowEditProject(true)}
+            onDelete={handleDeleteProject}
+            onDuplicate={handleDuplicateProject}
+            onArchive={handleArchiveProject}
+          />
+        </div>
+      </div>
+
+      {/* Project Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Progress</CardTitle>
+            <div className="h-4 w-4 text-muted-foreground">
+              <Progress value={completionPercentage} className="w-4" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{completionPercentage}%</div>
+            <p className="text-xs text-muted-foreground">
+              {doneTasks.length} of {tasks.length} tasks completed
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{tasks.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {inProgressTasks.length} in progress
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{project.assignees?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">Active members</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Due Date</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'No date'}
+            </div>
+            <p className="text-xs text-muted-foreground">Project deadline</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Project Content */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="team">Team</TabsTrigger>
+          <TabsTrigger value="chat">Chat</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Project Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Description</h4>
+                      <p className="text-muted-foreground">{project.description}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Progress</h4>
+                      <Progress value={completionPercentage} className="w-full" />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {completionPercentage}% complete
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Tasks</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {tasks.slice(0, 5).map((task) => (
+                      <div key={task.id} className="flex items-center justify-between p-2 border rounded">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={task.priority === 'high' ? 'destructive' : 'secondary'}>
+                            {task.priority}
+                          </Badge>
+                          <span className="font-medium">{task.title}</span>
+                        </div>
+                        <Badge variant="outline">{task.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Team Avatars */}
-            <div className="flex items-center">
-              <div className="flex -space-x-2">
-                {project.assignees.slice(0, 3).map((user, index) => (
-                  <Avatar
-                    key={user.id}
-                    className="border-2 border-background w-8 h-8"
-                  >
-                    <AvatarFallback className="text-xs">
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-                {project.assignees.length > 3 && (
-                  <div className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium">
-                    +{project.assignees.length - 3}
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Team Members</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {project.assignees?.map((member) => (
+                      <div key={member.id} className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={member.avatar} />
+                          <AvatarFallback>{member.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{member.name}</p>
+                          <p className="text-sm text-muted-foreground">{member.role}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="tasks" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                To Do
+                <Badge variant="secondary">{todoTasks.length}</Badge>
+              </h3>
+              <div className="space-y-3">
+                {todoTasks.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                In Progress
+                <Badge variant="secondary">{inProgressTasks.length}</Badge>
+              </h3>
+              <div className="space-y-3">
+                {inProgressTasks.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                Done
+                <Badge variant="secondary">{doneTasks.length}</Badge>
+              </h3>
+              <div className="space-y-3">
+                {doneTasks.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
               </div>
 
               <DropdownMenu>
@@ -349,233 +351,53 @@ const onDragEnd = (result: DropResult) => {
               </DropdownMenu>
             </div>
           </div>
+        </TabsContent>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => setShowOverview(true)}
-            >
-              <BarChart3 className="h-4 w-4" />
-              Overview
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowChat(!showChat)}
-              className="gap-2"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Chat
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setShowAddTask(true)}
-              className="gap-2 bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4" />
-              Add Task
-            </Button>
-          </div>
-        </div>
-
-        {/* Toolbar */}
-        {/* <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-xs">
-              Group: Status
-            </Button>
-            <Button variant="ghost" size="sm" className="gap-2 text-xs">
-              <Filter className="h-3 w-3" />
-              Filter
-            </Button>
-            <Button variant="ghost" size="sm" className="text-xs">
-              Sort
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-              <Input 
-                placeholder="Search tasks..." 
-                className="pl-7 h-7 w-48 text-xs"
-              />
-            </div>
-            <Button variant="ghost" size="sm" className="text-xs">
-              Customize
-            </Button>
-          </div>
-        </div> */}
-      </div>
-
-      {/* Board */}
-      <div className="relative flex-1 p-4 overflow-hidden">
-        <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-        <div
-    ref={boardRef}
-    className="
-      relative flex gap-4 h-full 
-      overflow-x-auto overflow-y-hidden 
-      select-none
-      cursor-default
-      active:cursor-grabbing
-    "
-    onMouseDown={handleMouseDown}
-    onMouseMove={handleMouseMove}
-    onMouseUp={handleMouseUp}
-    onMouseLeave={handleMouseLeave}
-  >
-            {statusColumns.map((column) => (
-              <div key={column.id} className="flex-shrink-0 w-80">
-                <div className="flex items-center justify-between mb-3 px-2">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        column.id === "todo"
-                          ? "border-[2px] border-dashed border-gray-400 w-4 h-5 "
-                          : column.id === "in-progress"
-                          ? "bg-blue-500"
-                          : column.id === "done" ? "bg-green-500" : "bg-orange-500"
-                      }`}
-                    />
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      {column.title}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {column.count}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={() => {
-                        setActiveColumn(column.id);
-                        setShowAddTask(true);
-                      }}
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
-                        >
-                          <MoreHorizontal className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => setShowAddTask(true)}>
-                          Add Task
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Clear Column</DropdownMenuItem>
-                        <DropdownMenuItem>Archive Tasks</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-
-                <Droppable droppableId={column.id}>
-  {(provided, snapshot) => (
-    <div
-      {...provided.droppableProps}
-      ref={provided.innerRef}
-      className={`space-y-2 p-2 rounded-lg transition-colors flex flex-col ${
-        snapshot.isDraggingOver ? 'bg-accent/50' : ''
-      }`}
-      style={{
-        overflowY: 'auto',
-        maxHeight: 'calc(100vh - 200px)',
-        overscrollBehavior: 'contain',
-      }}
-    >
-      {column.tasks.map((task, index) => (
-        <Draggable key={task.id} draggableId={task.id} index={index}>
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.draggableProps}
-              {...provided.dragHandleProps}
-              style={{
-                ...provided.draggableProps.style,
-              }}
-              className={`transition-all duration-200 ${
-                snapshot.isDragging
-                  ? 'rotate-1 scale-105 shadow-2xl z-50'
-                  : ''
-              }`}
-            >
-              <TaskCard
-                task={task}
-                onUpdateTask={(updates) =>
-                  updateTask(project.id, task.id, updates)
-                }
-                onDeleteTask={() => deleteTask(project.id, task.id)}
-              />
-            </div>
-          )}
-        </Draggable>
-      ))}
-      {provided.placeholder}
-
-      <Button
-        variant="ghost"
-        className="w-full justify-start text-muted-foreground hover:text-foreground h-8 text-xs"
-        onClick={() => {
-          setActiveColumn(column.id);
-          setShowAddTask(true);
-        }}
-      >
-        <Plus className="h-3 w-3 mr-2" />
-        Add Task
-      </Button>
-    </div>
-  )}
-</Droppable>
-
+        <TabsContent value="team">
+          <Card>
+            <CardHeader>
+              <CardTitle>Team Members</CardTitle>
+              <CardDescription>Manage your project team</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {project.assignees?.map((member) => (
+                  <Card key={member.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={member.avatar} />
+                          <AvatarFallback>{member.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{member.name}</p>
+                          <p className="text-sm text-muted-foreground">{member.role}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            <div className="flex-shrink-0 w-80">
-              <Button
-                variant="ghost"
-                className="w-full h-12 border-2 border-dashed border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add group
-              </Button>
-            </div>
-          </div>
-        </DragDropContext>
-      </div>
+        <TabsContent value="chat">
+          <ProjectChat projectId={project.id} onClose={() => setShowChat(false)} />
+        </TabsContent>
+      </Tabs>
 
       <AddTaskDialog
         open={showAddTask}
-        onOpenChange={(open) => {
-          setShowAddTask(open);
-          if (!open) setActiveColumn(null);
-        }}
-        onAddTask={(task) => {
-          const taskWithStatus = activeColumn
-            ? {
-                ...task,
-                status: activeColumn as "todo" | "in-progress" | "done",
-              }
-            : task;
-          addTask(project.id, taskWithStatus);
-        }}
+        onOpenChange={setShowAddTask}
+        onAddTask={handleAddTask}
       />
 
-      {showChat && (
-        <ProjectChat
-          projectId={project.id}
-          onClose={() => setShowChat(false)}
-        />
-      )}
+      <EditProjectDialog
+        open={showEditProject}
+        onOpenChange={setShowEditProject}
+        project={project}
+      />
     </div>
   );
 };

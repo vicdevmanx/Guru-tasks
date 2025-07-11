@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 
 export interface User {
@@ -182,7 +183,6 @@ export const useProjects = () => {
       assignees,
     };
     setProjects(prev => [...prev, newProject]);
-    return newProject.id; // Return the project ID
   };
 
   const updateProject = (id: string, updates: Partial<Project>) => {
