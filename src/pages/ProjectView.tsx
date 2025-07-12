@@ -301,7 +301,7 @@ export const ProjectView = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </div>
+         
 
           <div className="flex items-center gap-2">
             <Button
@@ -332,6 +332,7 @@ export const ProjectView = () => {
             </Button>
           </div>
         </div>
+         </div>
 
         {/* Toolbar */}
         {/* <div className="flex items-center justify-between">
@@ -373,7 +374,7 @@ export const ProjectView = () => {
                     <div
                       className={`w-3 h-3 rounded-full ${
                         column.id === "todo"
-                          ? "border-[2px] border-dashed border-gray-400 w-4 h-5 "
+                          ? " bg-gray-400 "
                           : column.id === "in-progress"
                           ? "bg-blue-500"
                           : column.id === "done" ? "bg-green-500" : "bg-orange-500"
