@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -10,6 +9,8 @@ import { Team } from '@/pages/Team';
 import { Analytics } from '@/pages/Analytics';
 import { Calendar } from '@/pages/Calendar';
 import { Settings } from '@/pages/Settings';
+import { Login } from '@/pages/Login';
+import { Signup } from '@/pages/Signup';
 import NotFound from '@/pages/NotFound';
 import './App.css';
 
@@ -17,11 +18,15 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Auth routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        
+        {/* Protected routes */}
         <Route path="/" element={<AppLayout />}>
           <Route index element={<Home />} />
           <Route path="projects" element={<Projects />} />
           <Route path="project/:projectId" element={<ProjectView />} />
-          <Route path="project/:projectId/overview" element={<ProjectView />} />
           <Route path="team" element={<Team />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="calendar" element={<Calendar />} />

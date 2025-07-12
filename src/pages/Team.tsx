@@ -1,22 +1,11 @@
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { 
-  Search, 
-  Filter, 
-  Users, 
-  Mail, 
-  Phone, 
-  MapPin,
-  MoreHorizontal,
-  UserPlus,
-  Grid3X3,
-  List
-} from 'lucide-react';
+import { Plus, Search, Mail, Phone, Calendar, MapPin, MoreHorizontal } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,319 +15,145 @@ import {
 import { useProjects } from '@/hooks/useProjects';
 
 export const Team = () => {
-  const { users, projects } = useProjects();
+  const { users } = useProjects();
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [filterDepartment, setFilterDepartment] = useState<string>('all');
 
-  const departments = [...new Set(users.map(user => user.department))];
-  
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.role.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDepartment = filterDepartment === 'all' || user.department === filterDepartment;
-    return matchesSearch && matchesDepartment;
-  });
-
-  const getUserProjectCount = (userId: string) => {
-    return projects.filter(project => 
-      project.assignees.some(assignee => assignee.id === userId)
-    ).length;
-  };
-
-  const getUserTaskCount = (userId: string) => {
-    return projects.reduce((total, project) => 
-      total + project.tasks.filter(task => 
-        task.assignees.some(assignee => assignee.id === userId)
-      ).length, 0
-    );
-  };
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.role.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="p-6 space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Team</h1>
+          <h1 className="text-3xl font-bold text-foreground">Team</h1>
           <p className="text-muted-foreground">Manage your team members and their roles</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Invite Member
-          </Button>
+        <Button className="gap-2">
+          <Plus className="h-4 w-4" />
+          Invite Member
+        </Button>
+      </div>
+
+      {/* Search */}
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search team members..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+      {/* Team Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredUsers.map(user => (
+          <Card key={user.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center pb-4">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <Avatar className="w-16 h-16 ring-4 ring-border">
+                    <AvatarFallback className="text-lg font-bold">
+                      {user.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+                </div>
+                <div className="text-center">
+                  <CardTitle className="text-lg">{user.name}</CardTitle>
+                  <p className="text-muted-foreground text-sm">{user.role}</p>
+                </div>
+                <Badge variant="secondary" className="px-3 py-1">
+                  {user.department}
+                </Badge>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3 text-sm">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span className="truncate">{user.email}</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <Mail className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Phone className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>View Profile</DropdownMenuItem>
+                    <DropdownMenuItem>Edit Role</DropdownMenuItem>
+                    <DropdownMenuItem>Send Message</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">
+                      Remove from Team
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Team Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Members</p>
                 <p className="text-2xl font-bold">{users.length}</p>
-                <p className="text-sm text-muted-foreground">Total Members</p>
+              </div>
+              <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                <Calendar className="h-4 w-4 text-blue-500" />
               </div>
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">{departments.length}</p>
-                <p className="text-sm text-muted-foreground">Departments</p>
+                <p className="text-sm font-medium text-muted-foreground">Departments</p>
+                <p className="text-2xl font-bold">{new Set(users.map(u => u.department)).size}</p>
+              </div>
+              <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center">
+                <MapPin className="h-4 w-4 text-green-500" />
               </div>
             </div>
           </CardContent>
         </Card>
-
+        
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">{users.filter(u => u.role.includes('Manager')).length}</p>
-                <p className="text-sm text-muted-foreground">Managers</p>
+                <p className="text-sm font-medium text-muted-foreground">Active Now</p>
+                <p className="text-2xl font-bold">{Math.floor(users.length * 0.7)}</p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                <Users className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{users.filter(u => !u.role.includes('Manager')).length}</p>
-                <p className="text-sm text-muted-foreground">Team Members</p>
+              <div className="w-8 h-8 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search team members..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <Filter className="h-4 w-4" />
-                    {filterDepartment === 'all' ? 'All Departments' : filterDepartment}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setFilterDepartment('all')}>
-                    All Departments
-                  </DropdownMenuItem>
-                  {departments.map(dept => (
-                    <DropdownMenuItem key={dept} onClick={() => setFilterDepartment(dept)}>
-                      {dept}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <div className="flex rounded-lg border">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-r-none"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-l-none"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Team Members */}
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredUsers.map(user => (
-            <Card key={user.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-12 h-12">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                        {user.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <Link 
-                        to={`/profile/${user.id}`}
-                        className="font-semibold hover:text-primary transition-colors"
-                      >
-                        {user.name}
-                      </Link>
-                      <p className="text-sm text-muted-foreground">{user.role}</p>
-                    </div>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link to={`/profile/${user.id}`}>View Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Send Message
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    {user.email}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    {user.department}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="text-center">
-                      <p className="text-lg font-semibold">{getUserProjectCount(user.id)}</p>
-                      <p className="text-xs text-muted-foreground">Projects</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-lg font-semibold">{getUserTaskCount(user.id)}</p>
-                      <p className="text-xs text-muted-foreground">Tasks</p>
-                    </div>
-                  </div>
-
-                  <Badge variant="secondary" className="w-fit">
-                    {user.department}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              {filteredUsers.map(user => (
-                <div key={user.id} className="p-4 hover:bg-accent/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-10 h-10">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {user.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <Link 
-                          to={`/profile/${user.id}`}
-                          className="font-medium hover:text-primary transition-colors"
-                        >
-                          {user.name}
-                        </Link>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-6">
-                      <div className="text-center">
-                        <p className="font-medium">{user.role}</p>
-                        <p className="text-sm text-muted-foreground">{user.department}</p>
-                      </div>
-                      
-                      <div className="text-center">
-                        <p className="font-medium">{getUserProjectCount(user.id)}</p>
-                        <p className="text-sm text-muted-foreground">Projects</p>
-                      </div>
-                      
-                      <div className="text-center">
-                        <p className="font-medium">{getUserTaskCount(user.id)}</p>
-                        <p className="text-sm text-muted-foreground">Tasks</p>
-                      </div>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link to={`/profile/${user.id}`}>View Profile</Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Mail className="h-4 w-4 mr-2" />
-                            Send Message
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {filteredUsers.length === 0 && (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No team members found</h3>
-            <p className="text-muted-foreground mb-4">
-              Try adjusting your search criteria or invite new members to join your team.
-            </p>
-            <Button>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Invite Team Member
-            </Button>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
