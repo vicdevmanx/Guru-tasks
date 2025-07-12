@@ -1,15 +1,20 @@
-
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Input } from '../ui/input';
-import { ToastProvider } from '../ui/toast';
-import { Toaster } from 'sonner';
+import React, { useEffect } from "react";
+import { Outlet } from "react-router-dom";
+import { Sidebar } from "./Sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Input } from "../ui/input";
+import { ToastProvider } from "../ui/toast";
+import { Toaster } from "sonner";
+import { useAuthStore } from "@/store/authstore";
 
 export const AppLayout = () => {
+  const fetchUser = useAuthStore((s) => s.fetchUser);
+  const user = useAuthStore((s) => s.user);
+  useEffect(() => {
+    fetchUser();
+  }, []);
   return (
-   <SidebarProvider>
+    <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <Sidebar />
         <div className="flex-1 flex flex-col">
@@ -24,8 +29,7 @@ export const AppLayout = () => {
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
-            
-          <Outlet/>
+            <Outlet />
           </main>
         </div>
       </div>
