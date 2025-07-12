@@ -341,13 +341,31 @@ export const Settings = () => {
               </div>
 
               <div className="space-y-4">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 mr-2">
                   <Lock className="h-4 w-4" />
                   Change Password
                 </Button>
                 <Button onClick={handleSecuritySave} className="gap-2">
                   <Save className="h-4 w-4" />
                   Save Security Settings
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-destructive">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-medium">Delete Account</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Permanently delete your account and all associated data. This action cannot be undone.
+                </p>
+                <Button variant="destructive" className="gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  Delete Account
                 </Button>
               </div>
             </CardContent>
@@ -417,23 +435,7 @@ export const Settings = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-destructive">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-medium">Delete Account</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Permanently delete your account and all associated data. This action cannot be undone.
-                </p>
-                <Button variant="destructive" className="gap-2">
-                  <Trash2 className="h-4 w-4" />
-                  Delete Account
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          
         </TabsContent>
       </Tabs>
     </div>
