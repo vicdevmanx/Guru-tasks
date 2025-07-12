@@ -72,14 +72,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           )}
         </div>
 
-        {task.assignee && (
+        {task.assignees && task.assignees.length > 0 && (
           <div className="mt-3 flex items-center gap-2">
             <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
               <span className="text-xs font-medium">
-                {task.assignee.charAt(0).toUpperCase()}
+                {task.assignees[0].name.charAt(0).toUpperCase()}
               </span>
             </div>
-            <span className="text-xs text-muted-foreground">{task.assignee}</span>
+            <span className="text-xs text-muted-foreground">
+              {task.assignees.length === 1 
+                ? task.assignees[0].name 
+                : `${task.assignees[0].name} +${task.assignees.length - 1}`
+              }
+            </span>
           </div>
         )}
       </CardContent>
