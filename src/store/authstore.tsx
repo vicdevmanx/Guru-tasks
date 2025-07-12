@@ -2,7 +2,30 @@ import { create } from "zustand";
 import Cookies from "js-cookie";
 import API from "@/components/axios";
 
-export const useAuthStore = create((set) => ({
+type User = {
+  access_role: string;
+  created_at: string;
+  email: string;
+  id: string;
+  name: string;
+  password: string;
+  profile_pic: string;
+  reset_token: string | null;
+  reset_token_expires_at: string | null;
+  role_id: number;
+  suspended: boolean;
+};
+
+interface AuthState {
+  user: User | null;
+  allUsers: User[] | null
+  logout: () => void,
+  token: string | null;
+  setUser: (user: User) => void;
+  setToken: (token: string) => void;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: Cookies.get("token") || null,
 
@@ -15,35 +38,25 @@ export const useAuthStore = create((set) => ({
     Cookies.remove("token");
     set({ user: null, token: null });
   },
-  
-  setCurrentPage: (currentPage) => set({ currentPage }),
 
-  fetchProductDetails: async (id) => {
-    try {
-      const res = await API.get(`/products/${id}`)
-      set({ productDetails: res.data })
-    } catch (err) {
-      console.log(err)
-    }
-  },
   allUsers: null,
   getAllUsers: async () => {
     try {
-      const res = await API.get('/admin/users')
+      const res = await API.get("/admin/users");
       // console.log(res.data)
-      set({ allUsers: res.data })
+      set({ allUsers: res.data });
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   },
-  myOrders: null,
-  fetchMyOrders: async () => {
-    try {
-      const res = await API.get('/orders')
-      // console.log(res.data)
-      set({ myOrders: res.data })
-    } catch (e) {
-      console.log(e)
-    }
-  }
+  // myOrders: null,
+  // fetchMyOrders: async () => {
+  //   try {
+  //     const res = await API.get("/orders");
+  //     // console.log(res.data)
+  //     set({ myOrders: res.data });
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // },
 }));

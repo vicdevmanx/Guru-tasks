@@ -13,6 +13,7 @@ import { Login } from '@/pages/Login';
 import { Signup } from '@/pages/Signup';
 import NotFound from '@/pages/NotFound';
 import './App.css';
+import ProtectedRoute from './components/protectedRoute';
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         
         {/* Protected routes */}
-        <Route path="/" element={<AppLayout />}>
+        <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<Home />} />
           <Route path="projects" element={<Projects />} />
           <Route path="project/:projectId" element={<ProjectView />} />

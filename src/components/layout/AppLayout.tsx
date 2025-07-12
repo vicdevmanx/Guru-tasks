@@ -4,13 +4,14 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '../ui/input';
+import { ToastProvider } from '../ui/toast';
+import { Toaster } from 'sonner';
 
 export const AppLayout = () => {
   return (
    <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <Sidebar />
-        
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <header className="py-3 border-b border-border backdrop-blur supports-[backdrop-filter]:bg-card/50">
@@ -23,6 +24,7 @@ export const AppLayout = () => {
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
+            
           <Outlet/>
           </main>
         </div>
