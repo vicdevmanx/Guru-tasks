@@ -51,7 +51,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
 
     onAddTask({
       title: formData.title,
-      description: formData.description,
+      description: formData.description || undefined,
       status: formData.status,
       priority: formData.priority,
       assignees: formData.assignees,

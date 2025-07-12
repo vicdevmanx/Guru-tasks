@@ -78,11 +78,11 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ collapsed }) => {
         </DropdownMenuItem>
 
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="cursor-pointer" >
-            <Palette className="mr-2 h-4 w-4"/>
+          <DropdownMenuSubTrigger className="cursor-pointer">
+            <Palette className="mr-2 h-4 w-4" />
             Theme
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-4">
+          <DropdownMenuSubContent className="w-48">
             <div className="p-2">
               <ThemeToggle />
             </div>
