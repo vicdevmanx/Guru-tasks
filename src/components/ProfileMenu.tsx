@@ -114,7 +114,10 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ collapsed }) => {
 
         <DropdownMenuItem
           className="cursor-pointer"
-          onClick={() => handleNavigation("/profile")}
+          onClick={() => {
+            if(!user) return
+            handleNavigation(`/profile/${user.id}`)
+          }}
         >
           <User className="mr-2 h-4 w-4" />
           View Profile

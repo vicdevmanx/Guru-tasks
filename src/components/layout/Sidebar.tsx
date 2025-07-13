@@ -34,10 +34,11 @@ import { useState } from 'react';
 
 const navigationItems = [
   { title: 'Dashboard', url: '/', icon: Home },
+    { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Projects', url: '/projects', icon: FolderKanban },
   { title: 'Team', url: '/team', icon: Users },
-  { title: 'Calendar', url: '/calendar', icon: Calendar },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
+  // { title: 'Calendar', url: '/calendar', icon: Calendar },
+
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 

@@ -1,57 +1,76 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { 
-  Search, 
-  Filter, 
-  Users, 
-  Mail, 
-  Phone, 
-  MapPin,
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Search,
+  Filter,
+  Users,
+  Mail,
+  Phone,
+  BriefcaseBusiness ,
   MoreHorizontal,
   UserPlus,
   Grid3X3,
-  List
-} from 'lucide-react';
+  List,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useProjects } from '@/hooks/useProjects';
+} from "@/components/ui/dropdown-menu";
+import { useProjects } from "@/hooks/useProjects";
+import { useAuthStore } from "@/store/authstore";
 
 export const Team = () => {
-  const { users, projects } = useProjects();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [filterDepartment, setFilterDepartment] = useState<string>('all');
+  const { projects } = useProjects();
+  const users = useAuthStore((s) => s.users);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [filterDepartment, setFilterDepartment] = useState<string>("all");
+  const fetchAllUsers = useAuthStore((s) => s.fetchAllUsers);
+  useEffect(() => {
+    // if (users) return;
+    fetchAllUsers();
+  }, []);
 
-  const departments = [...new Set(users.map(user => user.department))];
-  
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.role.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDepartment = filterDepartment === 'all' || user.department === filterDepartment;
-    return matchesSearch && matchesDepartment;
-  });
+  const departments = [
+    ...new Set(users && users.map((user) => user?.user_roles?.name)),
+  ];
+
+  const filteredUsers =
+    users &&
+    users.filter((user) => {
+      const matchesSearch =
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user?.user_roles?.name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+      const matchesDepartment =
+        filterDepartment === "all" ||
+        user?.user_roles?.name === filterDepartment;
+      return matchesSearch && matchesDepartment;
+    });
 
   const getUserProjectCount = (userId: string) => {
-    return projects.filter(project => 
-      project.assignees.some(assignee => assignee.id === userId)
+    return projects.filter((project) =>
+      project.assignees.some((assignee) => assignee.id === userId)
     ).length;
   };
 
   const getUserTaskCount = (userId: string) => {
-    return projects.reduce((total, project) => 
-      total + project.tasks.filter(task => 
-        task.assignees.some(assignee => assignee.id === userId)
-      ).length, 0
+    return projects.reduce(
+      (total, project) =>
+        total +
+        project.tasks.filter((task) =>
+          task.assignees.some((assignee) => assignee.id === userId)
+        ).length,
+      0
     );
   };
 
@@ -60,8 +79,12 @@ export const Team = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Team</h1>
-          <p className="text-muted-foreground">Manage your team members and their roles</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+            Team
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your team members and their roles
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button>
@@ -80,13 +103,13 @@ export const Team = () => {
                 <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{users.length}</p>
+                <p className="text-2xl font-bold">{users && users.length}</p>
                 <p className="text-sm text-muted-foreground">Total Members</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -95,7 +118,7 @@ export const Team = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{departments.length}</p>
-                <p className="text-sm text-muted-foreground">Departments</p>
+                <p className="text-sm text-muted-foreground">Professions</p>
               </div>
             </div>
           </CardContent>
@@ -108,8 +131,11 @@ export const Team = () => {
                 <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{users.filter(u => u.role.includes('Manager')).length}</p>
-                <p className="text-sm text-muted-foreground">Managers</p>
+                <p className="text-2xl font-bold">
+                  {users &&
+                    users.filter((u) => u.access_role.includes("Admin")).length}
+                </p>
+                <p className="text-sm text-muted-foreground">Admins</p>
               </div>
             </div>
           </CardContent>
@@ -122,7 +148,11 @@ export const Team = () => {
                 <Users className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{users.filter(u => !u.role.includes('Manager')).length}</p>
+                <p className="text-2xl font-bold">
+                  {users &&
+                    users.filter((u) => !u.access_role.includes("Admin"))
+                      .length}
+                </p>
                 <p className="text-sm text-muted-foreground">Team Members</p>
               </div>
             </div>
@@ -136,28 +166,33 @@ export const Team = () => {
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search team members..." 
+              <Input
+                placeholder="Search team members..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-            
+
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2">
                     <Filter className="h-4 w-4" />
-                    {filterDepartment === 'all' ? 'All Departments' : filterDepartment}
+                    {filterDepartment === "all"
+                      ? "All Departments"
+                      : filterDepartment}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setFilterDepartment('all')}>
+                  <DropdownMenuItem onClick={() => setFilterDepartment("all")}>
                     All Departments
                   </DropdownMenuItem>
-                  {departments.map(dept => (
-                    <DropdownMenuItem key={dept} onClick={() => setFilterDepartment(dept)}>
+                  {departments.map((dept) => (
+                    <DropdownMenuItem
+                      key={dept}
+                      onClick={() => setFilterDepartment(dept || "devloper")}
+                    >
                       {dept}
                     </DropdownMenuItem>
                   ))}
@@ -166,17 +201,17 @@ export const Team = () => {
 
               <div className="flex rounded-lg border">
                 <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setViewMode('grid')}
+                  onClick={() => setViewMode("grid")}
                   className="rounded-r-none"
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  variant={viewMode === "list" ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setViewMode('list')}
+                  onClick={() => setViewMode("list")}
                   className="rounded-l-none"
                 >
                   <List className="h-4 w-4" />
@@ -188,149 +223,199 @@ export const Team = () => {
       </Card>
 
       {/* Team Members */}
-      {viewMode === 'grid' ? (
+      {viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredUsers.map(user => (
-            <Card key={user.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-12 h-12">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                        {user.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <Link 
-                        to={`/profile/${user.id}`}
-                        className="font-semibold hover:text-primary transition-colors"
-                      >
-                        {user.name}
-                      </Link>
-                      <p className="text-sm text-muted-foreground">{user.role}</p>
+          {filteredUsers &&
+            filteredUsers.map((user) => (
+              <Card key={user.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="p-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-12 h-12">
+                        {user && user?.profile_pic ? (
+                          <img
+                            src={user.profile_pic}
+                            alt={user.name}
+                            className="object-cover w-full"
+                          />
+                        ) : (
+                          <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+                            {user.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div>
+                        <Link
+                          to={`/profile/${user.id}`}
+                          className="font-semibold hover:text-primary transition-colors"
+                        >
+                          {user.name}
+                        </Link>
+                        <p className="text-sm text-muted-foreground">
+                          {user.access_role}
+                        </p>
+                      </div>
                     </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link to={`/profile/${user.id}`}>View Profile</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Send Message
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link to={`/profile/${user.id}`}>View Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Send Message
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    {user.email}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    {user.department}
-                  </div>
+                </CardHeader>
+                <CardContent className="p-5 pt-0 ">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Mail className="h-4 w-4" />
+                      {user.email}
+                    </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="text-center">
-                      <p className="text-lg font-semibold">{getUserProjectCount(user.id)}</p>
-                      <p className="text-xs text-muted-foreground">Projects</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <BriefcaseBusiness  className="h-4 w-4" />
+                      {user.user_roles?.name}
                     </div>
-                    <div className="text-center">
-                      <p className="text-lg font-semibold">{getUserTaskCount(user.id)}</p>
-                      <p className="text-xs text-muted-foreground">Tasks</p>
-                    </div>
-                  </div>
 
-                  <Badge variant="secondary" className="w-fit">
-                    {user.department}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    <div className="flex items-center gap-8 pt-2 border-t">
+                      <div className="flex gap-1.5 items-center">
+                        <p className="text-lg font-semibold">
+                          {getUserProjectCount(user.id)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Projects
+                        </p>
+                      </div>
+                      <div className="flex gap-1.5 items-center">
+                        <p className="text-lg font-semibold">
+                          {getUserTaskCount(user.id)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Tasks</p>
+                      </div>
+                    </div>
+
+                    {/* <Badge variant="secondary" className="w-fit">
+                      {user.user_roles?.name}
+                    </Badge> */}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
         </div>
       ) : (
         <Card>
           <CardContent className="p-0">
             <div className="divide-y">
-              {filteredUsers.map(user => (
-                <div key={user.id} className="p-4 hover:bg-accent/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-10 h-10">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {user.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <Link 
-                          to={`/profile/${user.id}`}
-                          className="font-medium hover:text-primary transition-colors"
-                        >
-                          {user.name}
-                        </Link>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-6">
-                      <div className="text-center">
-                        <p className="font-medium">{user.role}</p>
-                        <p className="text-sm text-muted-foreground">{user.department}</p>
-                      </div>
-                      
-                      <div className="text-center">
-                        <p className="font-medium">{getUserProjectCount(user.id)}</p>
-                        <p className="text-sm text-muted-foreground">Projects</p>
-                      </div>
-                      
-                      <div className="text-center">
-                        <p className="font-medium">{getUserTaskCount(user.id)}</p>
-                        <p className="text-sm text-muted-foreground">Tasks</p>
+              {filteredUsers &&
+                filteredUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="p-4 hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="w-10 h-10">
+                          <AvatarFallback className="bg-primary text-primary-foreground">
+                            {user.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <Link
+                            to={`/profile/${user.id}`}
+                            className="font-medium hover:text-primary transition-colors"
+                          >
+                            {user.name}
+                          </Link>
+                          <p className="text-sm text-muted-foreground">
+                            {user.email}
+                          </p>
+                        </div>
                       </div>
 
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link to={`/profile/${user.id}`}>View Profile</Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Mail className="h-4 w-4 mr-2" />
-                            Send Message
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex items-center gap-6">
+                        <div className="text-center">
+                          <p className="font-medium">{user.access_role}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {user.user_roles?.name}
+                          </p>
+                        </div>
+
+                        <div className="text-center">
+                          <p className="font-medium">
+                            {getUserProjectCount(user.id)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Projects
+                          </p>
+                        </div>
+
+                        <div className="text-center">
+                          <p className="font-medium">
+                            {getUserTaskCount(user.id)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">Tasks</p>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link to={`/profile/${user.id}`}>
+                                View Profile
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Mail className="h-4 w-4 mr-2" />
+                              Send Message
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </CardContent>
         </Card>
       )}
 
-      {filteredUsers.length === 0 && (
+      {filteredUsers && filteredUsers.length === 0 && (
         <Card>
           <CardContent className="p-8 text-center">
             <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No team members found</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              No team members found
+            </h3>
             <p className="text-muted-foreground mb-4">
-              Try adjusting your search criteria or invite new members to join your team.
+              Try adjusting your search criteria or invite new members to join
+              your team.
             </p>
             <Button>
               <UserPlus className="h-4 w-4 mr-2" />

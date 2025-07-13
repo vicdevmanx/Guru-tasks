@@ -1,5 +1,6 @@
 
-import { useState } from 'react';
+import { useAuthStore } from '@/store/authstore';
+import { useEffect, useState } from 'react';
 
 export interface User {
   id: string;
@@ -172,6 +173,11 @@ export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [users] = useState<User[]>(mockUsers);
+//    const users = useAuthStore(s => s.users)
+//    const fetchAllUsers = useAuthStore(s => s.fetchAllUsers)
+//    useEffect(() => {
+// fetchAllUsers()
+//    },[])
 
   const addProject = (name: string, description?: string, assignees: User[] = []) => {
     const newProject: Project = {

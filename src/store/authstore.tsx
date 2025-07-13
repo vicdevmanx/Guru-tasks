@@ -13,7 +13,7 @@ export type User = {
   reset_token?: string | null;
   reset_token_expires_at?: string | null;
   tasks?: [];
-  user_roles?: { id: number, name: string };
+  user_roles?: { id: number; name: string };
   suspended?: boolean;
 };
 
@@ -25,15 +25,15 @@ export type Profile = {
   profile_pic: string | undefined | File; // <- if you allow uploaded files
 };
 
-
 interface AuthState {
   user: User | null;
-  allUsers: User[] | null;
+  users: User[] | null;
   logout: () => void;
   token: string | null;
   setUser: (user: User) => void;
   setToken: (token: string) => void;
   fetchUser: () => void;
+  fetchAllUsers: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -58,12 +58,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.log(e);
     }
   },
-  allUsers: null,
-  getAllUsers: async () => {
+  users: null,
+  fetchAllUsers: async () => {
     try {
-      const res = await API.get("/admin/users");
-      // console.log(res.data)
-      set({ allUsers: res.data });
+      const res = await API.get("api/users");
+      console.log(res.data)
+      set({ users: res.data });
     } catch (e) {
       console.log(e);
     }

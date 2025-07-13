@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import {
   Phone, 
   Calendar, 
   MapPin, 
-  Building, 
+  BriefcaseBusiness, 
   Edit3,
   Settings,
   Shield,
@@ -23,24 +23,34 @@ import {
   UserPlus
 } from 'lucide-react';
 import { useProjects } from '@/hooks/useProjects';
+import { useAuthStore } from '@/store/authstore';
+import { access } from 'fs';
 
 export const Profile = () => {
   const { userId } = useParams<{ userId?: string }>();
-  const { users, projects } = useProjects();
+  const { projects } = useProjects();
+  const users = useAuthStore(s => s.users)
   
   // If userId is provided, show that user's profile, otherwise show current user
-  const user = userId 
+  const user = userId && users
     ? users.find(u => u.id === userId) || users[0] // Fallback to first user if not found
     : {
         id: 'current',
         name: "John Doe",
         email: "john.doe@example.com",
-        role: "Project Manager",
-        department: "Engineering",
-        avatar: ''
+        access_role: "member",
+        user_roles: {name: "Engineering"},
+        profile_pic: '',
+        suspended: false
       };
 
   const isOwnProfile = !userId || userId === 'current';
+  const fetchAllUsers = useAuthStore((s) => s.fetchAllUsers);
+  useEffect(() => {
+      // if (users) return;
+      fetchAllUsers();
+    }, []);
+  
   
   // Get user's project involvement
   const userProjects = projects.filter(project => 
@@ -63,7 +73,7 @@ export const Profile = () => {
           {isOwnProfile ? 'My Profile' : `${user.name}'s Profile`}
         </h1>
         <div className="flex items-center gap-2">
-          {!isOwnProfile && (
+          {/* {!isOwnProfile && (
             <>
               <Button variant="outline" className="gap-2">
                 <MessageCircle className="h-4 w-4" />
@@ -74,7 +84,7 @@ export const Profile = () => {
                 Follow
               </Button>
             </>
-          )}
+          )} */}
           {isOwnProfile && (
             <Button className="gap-2">
               <Edit3 className="h-4 w-4" />
@@ -90,16 +100,25 @@ export const Profile = () => {
           <CardHeader className="text-center pb-4">
             <div className="flex flex-col items-center space-y-4">
               <Avatar className="w-24 h-24 ring-4 ring-border">
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
+                 {user && user?.profile_pic ? (
+                                <img
+                                  src={user.profile_pic}
+                                  alt={user.name}
+                                  className="object-cover w-full"
+                                />
+                              ) : (
+                                 <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
                   {user.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
+                              )}
+               
               </Avatar>
               <div>
                 <CardTitle className="text-xl">{user.name}</CardTitle>
-                <p className="text-muted-foreground">{user.role}</p>
+                <p className="text-muted-foreground">{user.access_role}</p>
               </div>
-              <Badge variant="secondary" className="px-3 py-1">
-                Active
+              <Badge variant={"secondary"} className={`px-4 py-1 text-white, ${user.suspended ? 'bg-red-500' : 'bg-blue-500'}`}>
+                {user.suspended ? 'Suspended' : 'Active'}
               </Badge>
             </div>
           </CardHeader>
@@ -109,8 +128,8 @@ export const Profile = () => {
               <span className="text-sm">{user.email}</span>
             </div>
             <div className="flex items-center gap-3">
-              <Building className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{user.department}</span>
+              <BriefcaseBusiness className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{user.user_roles?.name}</span>
             </div>
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground" />
