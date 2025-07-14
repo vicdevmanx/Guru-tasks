@@ -15,6 +15,8 @@ import {
   CheckCircle,
   TrendingUp,
   Clock,
+  BarChart3,
+  CheckCircle2
 } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
@@ -24,21 +26,54 @@ import type { Project } from "@/hooks/useProjects";
 import { useAuthStore } from "@/store/authstore";
 
 export const Home = () => {
-  const { projects, deleteProject } = useProjects();
+  const { projects, deleteProject } = useProjects(); 
+  // const projects = useAuthStore(s => s.projects)
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [showEditProject, setShowEditProject] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const user = useAuthStore(s => s.user)
 
-  const totalTasks = projects.reduce(
-    (acc, project) => acc + project.tasks.length,
-    0
-  );
-  const completedTasks = projects.reduce(
-    (acc, project) =>
-      acc + project.tasks.filter((task) => task.status === "done").length,
-    0
-  );
-  const pendingTasks = totalTasks - completedTasks;
+  // const totalTasks = projects.reduce(
+  //   (acc, project) => acc + project.tasks.length,
+  //   0
+  // );
+  // const completedTasks = projects.reduce(
+  //   (acc, project) =>
+  //     acc + project.tasks.filter((task) => task.status === "done").length,
+  //   0
+  // );
+  // const pendingTasks = totalTasks - completedTasks;
+
+  const stats = [
+  {
+    title: "Total Tasks",
+    value: "24",
+    change: "+12%",
+    icon: BarChart3,
+    color: "text-blue-500"
+  },
+  {
+    title: "Completed",
+    value: "18",
+    change: "+8%",
+    icon: CheckCircle2,
+    color: "text-green-500"
+  },
+  {
+    title: "In Progress",
+    value: "6",
+    change: "+4",
+    icon: Clock,
+    color: "text-orange-500"
+  },
+  {
+    title: "Team Members",
+    value: "12",
+    change: "+2",
+    icon: Users,
+    color: "text-purple-500"
+  }
+]
 
   const handleEditProject = (project: Project) => {
     setSelectedProject(project);
@@ -63,13 +98,26 @@ export const Home = () => {
     console.log("Archive project:", project.name);
   };
 
+  const getGreeting = () => {
+  const hour = new Date().getHours();
+
+  if (hour >= 1 && hour < 12) return "Good morning";
+  if (hour >= 12 && hour < 17) return "Good afternoon";
+  if (hour >= 17 && hour < 21) return "Good evening";
+  return "Good night";
+};
+
+
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here's what's happening with your projects.
+       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 className="text-3xl font-bold">
+  {getGreeting()}, {user?.name || "User"}! 👋
+</h1>
+
+          <p className="text-muted-foreground mt-1">
+            You have 3 tasks due today and 6 in progress. Let's get things done!
           </p>
         </div>
         <Button onClick={() => setShowCreateProject(true)} className="gap-2">
@@ -79,66 +127,32 @@ export const Home = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-l-4 border-l-blue-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Projects
-            </CardTitle>
-            <Users className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{projects.length}</div>
-            <p className="text-xs text-muted-foreground">Active projects</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-orange-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
-            <Clock className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingTasks}</div>
-            <p className="text-xs text-muted-foreground">Tasks in progress</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-green-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Completed Tasks
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completedTasks}</div>
-            <p className="text-xs text-muted-foreground">
-              {totalTasks > 0
-                ? Math.round((completedTasks / totalTasks) * 100)
-                : 0}
-              % completion rate
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-purple-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Productivity</CardTitle>
-            <TrendingUp className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+12%</div>
-            <p className="text-xs text-muted-foreground">From last month</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat) => (
+          <Card key={stat.title} className={`relative overflow-hidden border-l-4 border-l-${stat.color.split('-')[1]}-500`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+            </CardHeader>
+            <CardContent className="px-4">
+              <div className="text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-muted-foreground">
+                <span className="text-green-500">
+                  <TrendingUp className="inline h-3 w-3 mr-1" />
+                  {stat.change}
+                </span> from last month
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
+      
 
       {/* Projects Grid */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Your Projects</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => {
+          {projects && projects.map((project) => {
             const completionRate =
               project.tasks.length > 0
                 ? (project.tasks.filter((task) => task.status === "done")

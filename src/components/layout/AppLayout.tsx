@@ -6,12 +6,17 @@ import { Input } from "../ui/input";
 import { ToastProvider } from "../ui/toast";
 import { Toaster } from "sonner";
 import { useAuthStore } from "@/store/authstore";
+import { ProfileMenu } from "../ProfileMenu";
 
 export const AppLayout = () => {
   const fetchUser = useAuthStore((s) => s.fetchUser);
+  const fetchProjects = useAuthStore((s) => s.fetchProjects);
+  const fetchAllUsers = useAuthStore((s) => s.fetchAllUsers);
   const user = useAuthStore((s) => s.user);
   useEffect(() => {
+    fetchAllUsers();
     fetchUser();
+    fetchProjects();
   }, []);
   return (
     <SidebarProvider>
@@ -19,10 +24,13 @@ export const AppLayout = () => {
         <Sidebar />
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="py-3 border-b border-border backdrop-blur supports-[backdrop-filter]:bg-card/50">
+          <header className="py-1 border-b border-border backdrop-blur supports-[backdrop-filter]:bg-card/50">
             <div className="flex items-center justify-between h-full px-2">
               <div className="flex items-center gap-4">
                 <SidebarTrigger />
+              </div>
+              <div className='flex'>
+                <ProfileMenu collapsed={true} />
               </div>
             </div>
           </header>

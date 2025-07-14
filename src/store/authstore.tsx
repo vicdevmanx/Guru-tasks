@@ -1,10 +1,12 @@
 import { create } from "zustand";
 import Cookies from "js-cookie";
 import API from "@/components/axios";
+import { Project } from "@/hooks/useProjects";
 
 export type User = {
   access_role: string;
   created_at: string;
+  // user?: {id: string, name: string, email: string, profile_pic: string};
   email: string;
   id: string;
   name: string;
@@ -34,6 +36,8 @@ interface AuthState {
   setToken: (token: string) => void;
   fetchUser: () => void;
   fetchAllUsers: () => void;
+  fetchProjects: () => void;
+  projects: Project[] | null;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -52,7 +56,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   fetchUser: async (id = "me") => {
     try {
       const res = await API.get(`api/users/${id}`);
-      console.log(res);
+      // console.log(res);
       set({ user: res.data });
     } catch (e) {
       console.log(e);
@@ -62,20 +66,20 @@ export const useAuthStore = create<AuthState>((set) => ({
   fetchAllUsers: async () => {
     try {
       const res = await API.get("api/users");
-      console.log(res.data)
+      // console.log(res.data)
       set({ users: res.data });
     } catch (e) {
       console.log(e);
     }
   },
-  // myOrders: null,
-  // fetchMyOrders: async () => {
-  //   try {
-  //     const res = await API.get("/orders");
-  //     // console.log(res.data)
-  //     set({ myOrders: res.data });
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // },
+  projects: null,
+  fetchProjects: async () => {
+    try {
+      const res = await API.get("/api/projects");
+      console.log('projectsss', res.data)
+      set({ projects: res.data });
+    } catch (e) {
+      console.log(e);
+    }
+  },
 }));

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,8 @@ export const Profile = () => {
   const { userId } = useParams<{ userId?: string }>();
   const { projects } = useProjects();
   const users = useAuthStore(s => s.users)
+  const eachUser = useAuthStore(s => s.user)
+  const navigate = useNavigate()
   
   // If userId is provided, show that user's profile, otherwise show current user
   const user = userId && users
@@ -45,6 +47,7 @@ export const Profile = () => {
       };
 
   const isOwnProfile = !userId || userId === 'current';
+   const OwnProfile = eachUser && eachUser.id == user.id
   const fetchAllUsers = useAuthStore((s) => s.fetchAllUsers);
   useEffect(() => {
       // if (users) return;
@@ -54,7 +57,7 @@ export const Profile = () => {
   
   // Get user's project involvement
   const userProjects = projects.filter(project => 
-    project.assignees.some(assignee => assignee.id === user.id) ||
+    project?.project_members?.some(assignee => assignee.user.id === user.id) ||
     project.tasks.some(task => task.assignees.some(assignee => assignee.id === user.id))
   );
 
@@ -85,8 +88,8 @@ export const Profile = () => {
               </Button>
             </>
           )} */}
-          {isOwnProfile && (
-            <Button className="gap-2">
+          {OwnProfile && (
+            <Button className="gap-2" onClick={() => navigate('/settings')}>
               <Edit3 className="h-4 w-4" />
               Edit Profile
             </Button>
@@ -98,8 +101,8 @@ export const Profile = () => {
         {/* Profile Overview */}
         <Card className="lg:col-span-1">
           <CardHeader className="text-center pb-4">
-            <div className="flex flex-col items-center space-y-4">
-              <Avatar className="w-24 h-24 ring-4 ring-border">
+            <div className="flex flex-col items-start space-y-4">
+              <Avatar className="w-24 h-24 rounded-xl ring-4 ring-border">
                  {user && user?.profile_pic ? (
                                 <img
                                   src={user.profile_pic}
@@ -114,12 +117,10 @@ export const Profile = () => {
                
               </Avatar>
               <div>
-                <CardTitle className="text-xl">{user.name}</CardTitle>
-                <p className="text-muted-foreground">{user.access_role}</p>
+                <CardTitle className="text-xl text-left">{user.name}</CardTitle>
+                <p className="text-muted-foreground text-left">{user.access_role}</p>
               </div>
-              <Badge variant={"secondary"} className={`px-4 py-1 text-white, ${user.suspended ? 'bg-red-500' : 'bg-blue-500'}`}>
-                {user.suspended ? 'Suspended' : 'Active'}
-              </Badge>
+          
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -135,6 +136,9 @@ export const Profile = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">Joined January 2023</span>
             </div>
+                <Badge variant={"secondary"} className={`px-4 py-1 text-white, ${user.suspended ? 'bg-red-500' : 'bg-blue-500'}`}>
+                {user.suspended ? 'Suspended' : 'Active'}
+              </Badge>
           </CardContent>
         </Card>
 

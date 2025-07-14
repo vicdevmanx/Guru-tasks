@@ -55,12 +55,54 @@ const signupSchema = z.object({
 type SignupFormData = z.infer<typeof signupSchema>;
 
 const roles = [
-  { value: "developer", label: "Developer" },
-  { value: "designer", label: "Designer" },
-  { value: "manager", label: "Project Manager" },
-  { value: "analyst", label: "Business Analyst" },
-  { value: "tester", label: "QA Tester" },
-  { value: "other", label: "Other" },
+  { value: "Frontend Developer", label: "Frontend Developer" },
+  { value: "Backend Developer", label: "Backend Developer" },
+  { value: "Fullstack Developer", label: "Fullstack Developer" },
+  { value: "Mobile Developer", label: "Mobile Developer" },
+  { value: "Web Developer", label: "Web Developer" },
+  { value: "Game Developer", label: "Game Developer" },
+  { value: "DevOps Engineer", label: "DevOps Engineer" },
+  { value: "Embedded Systems Engineer", label: "Embedded Systems Engineer" },
+  { value: "UI/UX Designer", label: "UI/UX Designer" },
+  { value: "Product Designer", label: "Product Designer" },
+  { value: "Graphic Designer", label: "Graphic Designer" },
+  { value: "Motion Designer", label: "Motion Designer" },
+  { value: "UX Researcher", label: "UX Researcher" },
+  { value: "Brand Designer", label: "Brand Designer" },
+  {
+    value: "CEO(Chief Executive officer)",
+    label: "CEO(Chief Executive officer)",
+  },
+  {
+    value: "COO(Chief Operation officer)",
+    label: "COO(Chief Operation officer)",
+  },
+  {
+    value: "CTO(Chief Technical officer)",
+    label: "CTO(Chief Technical officer)",
+  },
+  { value: "Data Analyst", label: "Data Analyst" },
+  { value: "Data Engineer", label: "Data Engineer" },
+  { value: "AI/ML Engineer", label: "AI/ML Engineer" },
+  { value: "Cloud Engineer", label: "Cloud Engineer" },
+  { value: "SRE", label: "SRE" },
+  { value: "Cybersecurity Engineer", label: "Cybersecurity Engineer" },
+  { value: "Product Manager", label: "Product Manager" },
+  { value: "Technical Product Manager", label: "Technical Product Manager" },
+  { value: "Project Manager", label: "Project Manager" },
+  { value: "Scrum Master", label: "Scrum Master" },
+  { value: "Solutions Architect", label: "Solutions Architect" },
+  { value: "Software Architect", label: "Software Architect" },
+  { value: "Web3 Developer", label: "Web3 Developer" },
+  { value: "Smart Contract Developer", label: "Smart Contract Developer" },
+  { value: "Solidity Engineer", label: "Solidity Engineer" },
+  { value: "Blockchain Architect", label: "Blockchain Architect" },
+  { value: "frontend_developer", label: "frontend_developer" },
+  { value: "developer", label: "developer" },
+  { value: "designer", label: "designer" },
+  { value: "tester", label: "tester" },
+  { value: "manager", label: "manager" },
+  { value: "fullstack developer", label: "fullstack developer" },
 ];
 
 export const Signup = () => {
@@ -121,7 +163,7 @@ export const Signup = () => {
       formData.append("role", data.role);
 
       if (data.profilePicture) {
-        formData.append("profile_pic", data.profilePicture, '[PROFIlE_PIC]');
+        formData.append("profile_pic", data.profilePicture, "[PROFIlE_PIC]");
       }
 
       // TODO: Replace with actual backend URL

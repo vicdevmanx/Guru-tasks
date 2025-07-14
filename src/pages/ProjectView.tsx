@@ -184,7 +184,7 @@ export const ProjectView = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {project.assignees.length}
+                {project?.project_members.length}
               </div>
               <p className="text-xs text-muted-foreground">Active members</p>
             </CardContent>
@@ -198,26 +198,26 @@ export const ProjectView = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {project.assignees.map((user) => (
+              {project?.project_members.map((user) => (
                 <div
-                  key={user.id}
+                  key={user.user.id}
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent"
                 >
                   <Avatar>
                     <AvatarFallback>
-                      {user.name
+                      {user.user.name
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="font-medium">{user.name}</p>
+                    <p className="font-medium">{user.user.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {user.email}
+                      {user.user.email}
                     </p>
                   </div>
-                  <Badge variant="secondary">{user.role}</Badge>
+                  <Badge variant="secondary">{user.user_roles?.name}</Badge>
                 </div>
               ))}
             </div>
@@ -245,22 +245,22 @@ export const ProjectView = () => {
             {/* Team Avatars */}
             <div className="flex items-center">
               <div className="flex -space-x-2">
-                {project.assignees.slice(0, 3).map((user, index) => (
+                {project && project?.project_members.slice(0, 3).map((user, index) => (
                   <Avatar
-                    key={user.id}
+                    key={user?.user.id}
                     className="border-2 border-background w-8 h-8"
                   >
                     <AvatarFallback className="text-xs">
-                      {user.name
+                      {user.user.name
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
                 ))}
-                {project.assignees.length > 3 && (
+                {project?.project_members.length > 3 && (
                   <div className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium">
-                    +{project.assignees.length - 3}
+                    +{project?.project_members.length - 3}
                   </div>
                 )}
               </div>
@@ -274,14 +274,14 @@ export const ProjectView = () => {
                 <DropdownMenuContent align="start" className="w-64">
                   <div className="p-2">
                     <h4 className="font-medium mb-2">Team Members</h4>
-                    {project.assignees.map((user) => (
+                    {project?.project_members.map((user) => (
                       <div
-                        key={user.id}
+                        key={user?.user.id}
                         className="flex items-center gap-2 p-2 rounded hover:bg-accent"
                       >
                         <Avatar className="w-6 h-6">
                           <AvatarFallback className="text-xs">
-                            {user.name
+                            {user?.user.name
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
@@ -289,10 +289,10 @@ export const ProjectView = () => {
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">
-                            {user.name}
+                            {user?.user.name}
                           </p>
                           <p className="text-xs text-muted-foreground truncate">
-                            {user.email}
+                            {user?.user.email}
                           </p>
                         </div>
                       </div>

@@ -7,6 +7,10 @@ import {
   Palette,
   Shield,
   HelpCircle,
+  ChevronsUpDown,
+  Sun,
+  Moon,
+  Monitor
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuthStore } from "@/store/authstore";
+import { useTheme } from "@/hooks/useTheme";
 
 interface ProfileMenuProps {
   collapsed: boolean;
@@ -34,12 +39,11 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ collapsed }) => {
   const navigate = useNavigate();
   const userName = user?.name || "";
   const userEmail = user?.email || "";
+  const { theme, setTheme } = useTheme();
 
   const handleNavigation = (path: string) => {
     navigate(path);
   };
-
-  console.log(user);
   const handleLogout = () => {
     console.log("Logging out...");
     logout();
@@ -78,6 +82,8 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ collapsed }) => {
               <p className="text-xs text-muted-foreground">{userEmail}</p>
             </div>
           )}
+
+          {!collapsed && <ChevronsUpDown />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -136,10 +142,19 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ collapsed }) => {
             <Palette className="mr-2 h-4 w-4" />
             Theme
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-48">
-            <div className="p-2">
-              <ThemeToggle />
-            </div>
+          <DropdownMenuSubContent className=" p-2 flex flex-col gap-1 cursor-pointer">
+                  <div onClick={() => setTheme('light')} className='flex gap-1 items-center p-1 rounded-lg text-sm hover:bg-blue-500/80 px-2' style={{background: theme == 'light' ? "rgb(59 130 246 / 0.8)" : "transparent", color: theme == 'light' ? "white" : ""}}>
+                    <Sun className="mr-2 h-4 w-4" />
+                    <span>Light</span>
+                  </div>
+                  <div onClick={() => setTheme('dark')} className='flex gap-1 items-center p-1 rounded-lg text-sm hover:bg-blue-500/80 px-2' style={{background: theme == 'dark' ? "rgb(59 130 246 / 0.8)" : "transparent", color: theme == 'dark' ? "white" : ""}}>
+                    <Moon className="mr-2 h-4 w-4" />
+                    <span>Dark</span>
+                  </div>
+                  <div onClick={() => setTheme('system')} className='flex gap-1 items-center p-1 rounded-lg text-sm hover:bg-blue-500/80 px-2' style={{background: theme == 'system' ? "rgb(59 130 246 / 0.8)" : "transparent", color: theme == 'system' ? "white" : ""}}>
+                    <Monitor className="mr-2 h-4 w-4" />
+                    <span>System</span>
+                  </div>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 

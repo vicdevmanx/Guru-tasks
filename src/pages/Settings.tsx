@@ -89,7 +89,14 @@ export const Settings = () => {
     loginAlerts: true,
   });
   const [loading, setLoading] = useState(false);
+
+  ////////////////////////////////////////////////////profile save
   const handleProfileSave = async () => {
+    const {name, email, role} = profile
+    if(!name || !email || !role ){
+      toast.info('Please fill out all fields')
+      return
+    }
     setLoading(true);
     const formData = new FormData();
     formData.append("name", profile.name);
@@ -150,7 +157,7 @@ export const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile" className="gap-2">
             <User className="h-4 w-4" />
             Profile
@@ -163,10 +170,10 @@ export const Settings = () => {
             <Shield className="h-4 w-4" />
             Security
           </TabsTrigger>
-          <TabsTrigger value="appearance" className="gap-2">
+          {/* <TabsTrigger value="appearance" className="gap-2">
             <Palette className="h-4 w-4" />
             Appearance
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -523,7 +530,7 @@ export const Settings = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="appearance" className="space-y-6">
+        {/* <TabsContent value="appearance" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Appearance Settings</CardTitle>
@@ -588,7 +595,7 @@ export const Settings = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );

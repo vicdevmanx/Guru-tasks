@@ -16,6 +16,7 @@ import {
   UserPlus,
   Grid3X3,
   List,
+  UserRound 
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -59,7 +60,7 @@ export const Team = () => {
 
   const getUserProjectCount = (userId: string) => {
     return projects.filter((project) =>
-      project.assignees.some((assignee) => assignee.id === userId)
+      project?.project_members.some((assignee) => assignee.user.id === userId)
     ).length;
   };
 
@@ -133,7 +134,7 @@ export const Team = () => {
               <div>
                 <p className="text-2xl font-bold">
                   {users &&
-                    users.filter((u) => u.access_role.includes("Admin")).length}
+                    users.filter((u) => u.access_role.includes("admin")).length}
                 </p>
                 <p className="text-sm text-muted-foreground">Admins</p>
               </div>
@@ -271,7 +272,7 @@ export const Team = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link to={`/profile/${user.id}`}>View Profile</Link>
+                          <Link to={`/profile/${user.id}`}> <UserRound  className="h-4 w-4 mr-2" /> View Profile</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Mail className="h-4 w-4 mr-2" />
