@@ -247,13 +247,13 @@ export const ProjectView = () => {
               <h1 className="text-2xl font-bold text-foreground">
                 {project.name}
               </h1>
-              <p className="text-muted-foreground text-sm">
+              {/* <p className="text-muted-foreground text-sm">
                 {project.description}
-              </p>
+              </p> */}
             </div>
 
             {/* Team Avatars */}
-            <div className="flex items-center max-w-full">
+            <div className="flex items-center">
               <div className="flex -space-x-2">
                 {project &&
                   project?.project_members.slice(0, 3).map((user, index) => (
@@ -393,7 +393,7 @@ export const ProjectView = () => {
       </div>
 
       {/* Board */}
-      <div className="relative flex-1 p-4 overflow-scroll">
+      <div className="relative flex-1 p-4">
         <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
           <div className="relative flex gap-4 h-full overflow-x-auto overflow-y-hidden">
             {statusColumns.map((column) => (
@@ -517,7 +517,7 @@ export const ProjectView = () => {
               </div>
             ))}
 
-            <div className="flex-shrink-0 w-80">
+            {/* <div className="flex-shrink-0 w-80">
               <Button
                 variant="ghost"
                 className="w-full h-12 border-2 border-dashed border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"
@@ -525,7 +525,7 @@ export const ProjectView = () => {
                 <Plus className="h-4 w-4 mr-2" />
                 Add group
               </Button>
-            </div>
+            </div> */}
           </div>
         </DragDropContext>
       </div>

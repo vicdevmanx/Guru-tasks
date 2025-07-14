@@ -134,7 +134,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup>
-            <div className="flex items-center justify-between px-2 py-1">
+            <div className="flex items-center justify-between">
               {!collapsed && (
                 <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Projects

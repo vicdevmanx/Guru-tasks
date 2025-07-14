@@ -265,8 +265,13 @@ export const useProjects = () => {
     );
   };
 
-  const deleteProject = (id: string) => {
+  const deleteProject = async (id: string) => {
     setProjects((prev) => prev.filter((project) => project.id !== id));
+    try{
+    const res = await API.delete(`api/projects/${id}`)
+    }catch(e){
+      console.log(e)
+    }
   };
 
   const addTask = (projectId: string, task: Omit<Task, "id" | "createdAt">) => {

@@ -165,13 +165,13 @@ export const Home = () => {
               <div key={project.id} className="group relative">
                 <Link to={`/project/${project.id}`}>
                   <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
-                    <CardHeader>
+                    <CardHeader className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-lg line-clamp-1">
                             {project.name}
                           </CardTitle>
-                          <CardDescription className="line-clamp-2 mt-1  h-10">
+                          <CardDescription className="line-clamp-2 mt-1  h-10 p-0">
                             {project.description || "No description provided"}
                           </CardDescription>
                         </div>
