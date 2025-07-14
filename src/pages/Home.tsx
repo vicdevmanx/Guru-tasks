@@ -150,7 +150,7 @@ export const Home = () => {
 
       {/* Projects Grid */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Your Projects</h2>
+        <h2 className="text-xl font-semibold mb-4">Guru's Projects</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects && projects.map((project) => {
             const completionRate =
@@ -171,7 +171,7 @@ export const Home = () => {
                           <CardTitle className="text-lg line-clamp-1">
                             {project.name}
                           </CardTitle>
-                          <CardDescription className="line-clamp-2 mt-1">
+                          <CardDescription className="line-clamp-2 mt-1  h-10">
                             {project.description || "No description provided"}
                           </CardDescription>
                         </div>

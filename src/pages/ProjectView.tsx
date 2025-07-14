@@ -41,7 +41,7 @@ export const ProjectView = () => {
   const [activeColumn, setActiveColumn] = useState<string | null>(null);
   const [showOverview, setShowOverview] = useState(false);
 
-  const project = projects.find((p) => p.id === projectId);
+  const project = projects && projects.find((p) => p.id === projectId);
 
   if (!project) {
     return (
@@ -217,7 +217,7 @@ export const ProjectView = () => {
                       {user.user.email}
                     </p>
                   </div>
-                  <Badge variant="secondary">{user.user_roles?.name}</Badge>
+                  <Badge variant="secondary">{user.user.user_roles?.name}</Badge>
                 </div>
               ))}
             </div>

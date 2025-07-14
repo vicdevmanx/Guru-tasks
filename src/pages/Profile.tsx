@@ -56,18 +56,18 @@ export const Profile = () => {
   
   
   // Get user's project involvement
-  const userProjects = projects.filter(project => 
+  const userProjects = projects && projects.filter(project => 
     project?.project_members?.some(assignee => assignee.user.id === user.id) ||
     project.tasks.some(task => task.assignees.some(assignee => assignee.id === user.id))
   );
 
-  const userTasks = projects.flatMap(project =>
+  const userTasks = projects && projects.flatMap(project =>
     project.tasks.filter(task => 
       task.assignees.some(assignee => assignee.id === user.id)
     )
   );
 
-  const completedTasks = userTasks.filter(task => task.status === 'done');
+  const completedTasks = userTasks && userTasks.filter(task => task.status === 'done');
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 animate-fade-in">
@@ -149,7 +149,7 @@ export const Profile = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold">{userProjects.length}</p>
+                  <p className="text-2xl font-bold">{userProjects && userProjects.length}</p>
                   <p className="text-sm text-muted-foreground">Projects</p>
                 </div>
               </CardContent>
@@ -157,7 +157,7 @@ export const Profile = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold">{userTasks.length}</p>
+                  <p className="text-2xl font-bold">{userTasks  && userTasks.length}</p>
                   <p className="text-sm text-muted-foreground">Total Tasks</p>
                 </div>
               </CardContent>
@@ -165,7 +165,7 @@ export const Profile = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold">{completedTasks.length}</p>
+                  <p className="text-2xl font-bold">{completedTasks && completedTasks.length}</p>
                   <p className="text-sm text-muted-foreground">Completed</p>
                 </div>
               </CardContent>
@@ -213,7 +213,7 @@ export const Profile = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {userProjects.slice(0, 5).map(project => {
+                {userProjects && userProjects.slice(0, 5).map(project => {
                   const userTasksInProject = project.tasks.filter(task =>
                     task.assignees.some(assignee => assignee.id === user.id)
                   );

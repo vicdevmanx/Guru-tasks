@@ -12,10 +12,10 @@ import Cookies from "js-cookie";
 //   department: string;
 // }
 
- type Members = {
+type Members = {
   access_role: string;
   created_at: string;
-  user: {id: string, name: string, email: string, profile_pic: string};
+  user: { id: string; name: string; email: string; profile_pic: string };
   email: string;
   id: string;
   name: string;
@@ -27,7 +27,6 @@ import Cookies from "js-cookie";
   user_roles?: { id: number; name: string };
   suspended?: boolean;
 };
-
 
 export interface Project {
   id: string;
@@ -190,13 +189,16 @@ export interface ChatMessage {
 // ];
 
 export const useProjects = () => {
-  const storeProjects = useAuthStore((s) => s.projects);
-  const [projects, setProjects] = useState<Project[]>(storeProjects || []);
+  const projects = useAuthStore((s) => s.projects);
+  const setProjects = useAuthStore((s) => s.setProjects);
+  
+//  const storeProjects = []
+//   const [ nice, setProjects] = useState<Project[]>(storeProjects || []);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   // const [users] = useState<User[]>(mockUsers);
   const users = useAuthStore((s) => s.users);
-  
+
   const fetchProjects = useAuthStore((s) => s.fetchProjects);
   const fetchAllUsers = useAuthStore((s) => s.fetchAllUsers);
   useEffect(() => {
@@ -205,9 +207,8 @@ export const useProjects = () => {
   }, []);
 
   useEffect(() => {
-    if (!storeProjects) return;
-    fetchProjects()
-    setProjects(storeProjects)
+    if (!projects) return;
+    fetchProjects();
   }, []);
 
   const addProject = async (
@@ -250,10 +251,10 @@ export const useProjects = () => {
       }
       const result = await res.json();
       console.log(result);
+      setProjects((prev) => [...prev, result.project]);
     } catch (e) {
       console.log(e);
     }
-    // setProjects((prev) => [...prev, newProject]);
   };
 
   const updateProject = (id: string, updates: Partial<Project>) => {

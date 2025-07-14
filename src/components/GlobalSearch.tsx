@@ -39,7 +39,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
         break;
       case "task":
         // Find project containing this task
-        const project = projects.find((p) => p.tasks.some((t) => t.id === id));
+        const project = projects && projects.find((p) => p.tasks.some((t) => t.id === id));
         if (project) {
           navigate(`/project/${project.id}`);
         }
@@ -49,13 +49,13 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
     onOpenChange(false);
   };
 
-  const filteredProjects = projects.filter(
+  const filteredProjects = projects && projects.filter(
     (project) =>
       project.name.toLowerCase().includes(query.toLowerCase()) ||
       project.description?.toLowerCase().includes(query.toLowerCase())
   );
 
-  const filteredTasks = projects.flatMap((project) =>
+  const filteredTasks = projects && projects.flatMap((project) =>
     project.tasks
       .filter(
         (task) =>
@@ -88,9 +88,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 
-        {filteredProjects.length > 0 && (
+        {filteredProjects && filteredProjects.length > 0 && (
           <CommandGroup heading="Projects">
-            {filteredProjects.slice(0, 5).map((project) => (
+            {filteredProjects && filteredProjects.slice(0, 5).map((project) => (
               <CommandItem
                 key={project.id}
                 value={`project:${project.id}`}
@@ -109,9 +109,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
           </CommandGroup>
         )}
 
-        {filteredTasks.length > 0 && (
+        {filteredTasks && filteredTasks.length > 0 && (
           <CommandGroup heading="Tasks">
-            {filteredTasks.slice(0, 5).map((task) => (
+            {filteredTasks && filteredTasks.slice(0, 5).map((task) => (
               <CommandItem
                 key={task.id}
                 value={`task:${task.id}`}

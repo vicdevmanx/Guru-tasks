@@ -37,7 +37,8 @@ interface AuthState {
   fetchUser: () => void;
   fetchAllUsers: () => void;
   fetchProjects: () => void;
-  projects: Project[] | null;
+  projects: Project[] | [];
+  setProjects: (projects: Project[] | ((prev: Project[]) => Project[])) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -72,7 +73,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.log(e);
     }
   },
-  projects: null,
+  projects: [],
+ setProjects: (updater) =>
+  set((state) => ({
+    projects: typeof updater === 'function' ? updater(state.projects) : updater,
+  })),
   fetchProjects: async () => {
     try {
       const res = await API.get("/api/projects");

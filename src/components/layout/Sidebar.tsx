@@ -151,7 +151,7 @@ export function AppSidebar() {
             </div>
             <SidebarGroupContent>
               <SidebarMenu>
-                {projects.slice(0, 5).map((project) => (
+                {projects && projects.slice(0, 5).map((project) => (
                   <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton asChild>
                       <Link 

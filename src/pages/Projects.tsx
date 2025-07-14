@@ -18,7 +18,7 @@ export const Projects = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredProjects = projects.filter(project =>
+  const filteredProjects = projects && projects.filter(project =>
     project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     project.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -83,7 +83,7 @@ export const Projects = () => {
       {/* Projects Grid/List */}
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map(project => {
+          {filteredProjects && filteredProjects.map(project => {
             const completionRate = project.tasks.length > 0
               ? (project.tasks.filter(task => task.status === 'done').length / project.tasks.length) * 100
               : 0;
@@ -96,7 +96,7 @@ export const Projects = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-lg line-clamp-1">{project.name}</CardTitle>
-                          <CardDescription className="line-clamp-2 mt-1">
+                          <CardDescription className="line-clamp-2 mt-1 h-10">
                             {project.description || 'No description provided'}
                           </CardDescription>
                         </div>
@@ -129,16 +129,16 @@ export const Projects = () => {
                         {/* Team Avatars */}
                         <div className="flex items-center justify-between">
                           <div className="flex -space-x-2">
-                            {project.assignees.slice(0, 3).map((user, index) => (
-                              <Avatar key={user.id} className="border-2 border-background w-6 h-6">
+                            {project.project_members.slice(0, 3).map((user, index) => (
+                              <Avatar key={user.user.id} className="border-2 border-background w-6 h-6">
                                 <AvatarFallback className="text-xs">
-                                  {user.name.split(' ').map(n => n[0]).join('')}
+                                  {user.user.name.split(' ').map(n => n[0]).join('')}
                                 </AvatarFallback>
                               </Avatar>
                             ))}
-                            {project.assignees.length > 3 && (
+                            {project.project_members.length > 3 && (
                               <div className="w-6 h-6 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium">
-                                +{project.assignees.length - 3}
+                                +{project.project_members.length - 3}
                               </div>
                             )}
                           </div>
@@ -161,7 +161,7 @@ export const Projects = () => {
         </div>
       ) : (
         <div className="space-y-2">
-          {filteredProjects.map(project => {
+          {filteredProjects && filteredProjects.map(project => {
             const completionRate = project.tasks.length > 0
               ? (project.tasks.filter(task => task.status === 'done').length / project.tasks.length) * 100
               : 0;
@@ -186,10 +186,10 @@ export const Projects = () => {
                       </div>
                       
                       <div className="flex -space-x-1">
-                        {project.assignees.slice(0, 3).map((user) => (
-                          <Avatar key={user.id} className="border-2 border-background w-6 h-6">
+                        {project.project_members.slice(0, 3).map((user) => (
+                          <Avatar key={user.user.id} className="border-2 border-background w-6 h-6">
                             <AvatarFallback className="text-xs">
-                              {user.name.split(' ').map(n => n[0]).join('')}
+                              {user.user.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
                         ))}

@@ -59,13 +59,13 @@ export const Team = () => {
     });
 
   const getUserProjectCount = (userId: string) => {
-    return projects.filter((project) =>
+    return projects && projects.filter((project) =>
       project?.project_members.some((assignee) => assignee.user.id === userId)
     ).length;
   };
 
   const getUserTaskCount = (userId: string) => {
-    return projects.reduce(
+    return projects && projects.reduce(
       (total, project) =>
         total +
         project.tasks.filter((task) =>
