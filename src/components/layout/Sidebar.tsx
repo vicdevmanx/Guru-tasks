@@ -1,16 +1,15 @@
-
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  FolderKanban, 
-  Users, 
-  Calendar, 
-  BarChart3, 
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  Home,
+  FolderKanban,
+  Users,
+  Calendar,
+  BarChart3,
   Settings,
   Plus,
-  Search
-} from 'lucide-react';
+  Search,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,22 +23,22 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { ProfileMenu } from '@/components/ProfileMenu';
-import { useProjects } from '@/hooks/useProjects';
-import { CreateProjectDialog } from '@/components/CreateProjectDialog';
-import { GlobalSearch } from '@/components/GlobalSearch';
-import { useState } from 'react';
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { ProfileMenu } from "@/components/ProfileMenu";
+import { useProjects } from "@/hooks/useProjects";
+import { CreateProjectDialog } from "@/components/CreateProjectDialog";
+import { GlobalSearch } from "@/components/GlobalSearch";
+import { useState } from "react";
 
 const navigationItems = [
-  { title: 'Dashboard', url: '/', icon: Home },
-    { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-  { title: 'Projects', url: '/projects', icon: FolderKanban },
-  { title: 'Team', url: '/team', icon: Users },
+  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Projects", url: "/projects", icon: FolderKanban },
+  { title: "Team", url: "/team", icon: Users },
   // { title: 'Calendar', url: '/calendar', icon: Calendar },
 
-  { title: 'Settings', url: '/settings', icon: Settings },
+  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -48,56 +47,57 @@ export function AppSidebar() {
   const { projects } = useProjects();
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
-  
+
   const collapsed = state === "collapsed";
   const currentPath = location.pathname;
 
   const isActive = (path: string) => {
-    if (path === '/') return currentPath === '/';
+    if (path === "/") return currentPath === "/";
     return currentPath.startsWith(path);
   };
 
   const getNavClass = (path: string) =>
-    isActive(path) 
-      ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+    isActive(path)
+      ? "bg-primary text-primary-foreground hover:bg-primary/90"
       : "hover:bg-accent hover:text-accent-foreground";
 
   // Handle keyboard shortcut
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setShowGlobalSearch(true);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   return (
     <>
-      <Sidebar 
-        className={`transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
+      <Sidebar
+        className={`transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}
         collapsible="icon"
       >
         <SidebarHeader className="border-b border-border p-4">
           <div className="flex items-center gap-3">
-              <div className="flex items-center gap-3">
-            {/* <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              {/* <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">GT</span>
             </div> */}
+              🎯{" "}
+              {!collapsed && (
+                <div>
+                  <h2 className="font-bold text-foreground">Guru Tasks</h2>
+                  <p className="text-xs text-muted-foreground -mt-1">
+                    Team Workspace
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
 
-           🎯 {!collapsed && (
-              <div>
-                <h2 className="font-bold text-foreground">Guru Tasks</h2>
-                <p className="text-xs text-muted-foreground -mt-1">Team Workspace</p>
-              </div>
-            )}
-          </div>
-          
-          </div>
-          
           {/* Global Search */}
           {!collapsed && (
             <Button
@@ -119,8 +119,8 @@ export function AppSidebar() {
                 {navigationItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <Link 
-                        to={item.url} 
+                      <Link
+                        to={item.url}
                         className={`${getNavClass(item.url)} transition-colors`}
                       >
                         <item.icon className="h-4 w-4" />
@@ -151,21 +151,42 @@ export function AppSidebar() {
             </div>
             <SidebarGroupContent>
               <SidebarMenu>
-                {projects && projects.slice(0, 5).map((project) => (
-                  <SidebarMenuItem key={project.id}>
-                    <SidebarMenuButton asChild>
-                      <Link 
-                        to={`/project/${project.id}`}
-                        className={`${getNavClass(`/project/${project.id}`)} transition-colors`}
-                      >
-                        <div className="w-4 h-4 rounded bg-primary/20 flex-shrink-0" />
-                        {!collapsed && (
-                          <span className="truncate">{project.name}</span>
-                        )}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {projects &&
+                  projects.slice(0, 5).map((project) => (
+                    <SidebarMenuItem key={project.id}>
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={`/project/${project.id}`}
+                          className={`${getNavClass(
+                            `/project/${project.id}`
+                          )} transition-colors`}
+                        >
+                          {project && project?.image ? (
+                            <img
+                              src={
+                                typeof project.image === "string"
+                                  ? project.image
+                                  : undefined
+                              }
+                              alt={project.name}
+                              className="object-cover text-xs w-5 h-5 rounded"
+                            />
+                          ) : (
+                            <div className="text-xs w-5 h-5 rounded bg-primary/20 flex-shrink-0 flex items-center justify-center">
+                              {project.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </div>
+                          )}
+                          {/* <div className="w-4 h-4 rounded bg-primary/20 flex-shrink-0" /> */}
+                          {!collapsed && (
+                            <span className="truncate">{project.name}</span>
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -180,7 +201,7 @@ export function AppSidebar() {
         open={showCreateProject}
         onOpenChange={setShowCreateProject}
       />
-      
+
       <GlobalSearch
         open={showGlobalSearch}
         onOpenChange={setShowGlobalSearch}

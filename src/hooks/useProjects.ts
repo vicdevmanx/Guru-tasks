@@ -36,7 +36,7 @@ export interface Project {
   tasks: Task[];
   assignees?: User[];
   project_members: Members[] | [];
-  image?: File | null;
+  image?: File | null | string;
 }
 
 export interface Task {

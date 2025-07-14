@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 import {
   DragDropContext,
@@ -86,7 +86,7 @@ export const ProjectView = () => {
     (task) => task.status === "in-progress"
   );
   const doneTasks = project.tasks.filter((task) => task.status === "done");
-   const reviewTasks = project.tasks.filter((task) => task.status === "review");
+  const reviewTasks = project.tasks.filter((task) => task.status === "review");
 
   const statusColumns = [
     {
@@ -201,15 +201,23 @@ export const ProjectView = () => {
               {project?.project_members.map((user) => (
                 <div
                   key={user.user.id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent"
+                  className="flex items-center gap-3 p-0 rounded-lg hover:bg-accent"
                 >
                   <Avatar>
-                    <AvatarFallback>
-                      {user.user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
+                    {user && user?.user.profile_pic ? (
+                      <img
+                        src={user.user.profile_pic}
+                        alt={user.user.name}
+                        className="object-cover w-full"
+                      />
+                    ) : (
+                      <AvatarFallback className="text-xs">
+                        {user.user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                   <div className="flex-1">
                     <p className="font-medium">{user.user.name}</p>
@@ -217,7 +225,9 @@ export const ProjectView = () => {
                       {user.user.email}
                     </p>
                   </div>
-                  <Badge variant="secondary">{user.user.user_roles?.name}</Badge>
+                  <Badge variant="secondary">
+                    {user.user.user_roles?.name}
+                  </Badge>
                 </div>
               ))}
             </div>
@@ -243,21 +253,30 @@ export const ProjectView = () => {
             </div>
 
             {/* Team Avatars */}
-            <div className="flex items-center">
+            <div className="flex items-center max-w-full">
               <div className="flex -space-x-2">
-                {project && project?.project_members.slice(0, 3).map((user, index) => (
-                  <Avatar
-                    key={user?.user.id}
-                    className="border-2 border-background w-8 h-8"
-                  >
-                    <AvatarFallback className="text-xs">
-                      {user.user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
+                {project &&
+                  project?.project_members.slice(0, 3).map((user, index) => (
+                    <Avatar
+                      key={user?.user.id}
+                      className="border-2 border-background w-8 h-8"
+                    >
+                      {user && user?.user.profile_pic ? (
+                      <img
+                        src={user.user.profile_pic}
+                        alt={user.user.name}
+                        className="object-cover w-full"
+                      />
+                    ) : (
+                      <AvatarFallback className="text-xs">
+                        {user.user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    )}
+                    </Avatar>
+                  ))}
                 {project?.project_members.length > 3 && (
                   <div className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium">
                     +{project?.project_members.length - 3}
@@ -275,16 +294,27 @@ export const ProjectView = () => {
                   <div className="p-2">
                     <h4 className="font-medium mb-2">Team Members</h4>
                     {project?.project_members.map((user) => (
-                      <div
+                      <Link
                         key={user?.user.id}
+                        to={`/profile/${user.user.id}`}
                         className="flex items-center gap-2 p-2 rounded hover:bg-accent"
                       >
                         <Avatar className="w-6 h-6">
                           <AvatarFallback className="text-xs">
-                            {user?.user.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
+                            {user && user?.user.profile_pic ? (
+                      <img
+                        src={user.user.profile_pic}
+                        alt={user.user.name}
+                        className="object-cover w-full"
+                      />
+                    ) : (
+                      <AvatarFallback className="text-xs">
+                        {user.user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    )}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
@@ -295,44 +325,43 @@ export const ProjectView = () => {
                             {user?.user.email}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-         
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => setShowOverview(true)}
-            >
-              <BarChart3 className="h-4 w-4" />
-              Overview
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowChat(!showChat)}
-              className="gap-2"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Chat
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setShowAddTask(true)}
-              className="gap-2 bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4" />
-              Add Task
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowOverview(true)}
+              >
+                <BarChart3 className="h-4 w-4" />
+                Overview
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowChat(!showChat)}
+                className="gap-2"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Chat
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setShowAddTask(true)}
+                className="gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4" />
+                Add Task
+              </Button>
+            </div>
           </div>
         </div>
-         </div>
 
         {/* Toolbar */}
         {/* <div className="flex items-center justify-between">
@@ -364,7 +393,7 @@ export const ProjectView = () => {
       </div>
 
       {/* Board */}
-      <div className="relative flex-1 p-4 overflow-hidden">
+      <div className="relative flex-1 p-4 overflow-scroll">
         <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
           <div className="relative flex gap-4 h-full overflow-x-auto overflow-y-hidden">
             {statusColumns.map((column) => (
@@ -377,7 +406,9 @@ export const ProjectView = () => {
                           ? " bg-gray-400 "
                           : column.id === "in-progress"
                           ? "bg-blue-500"
-                          : column.id === "done" ? "bg-green-500" : "bg-orange-500"
+                          : column.id === "done"
+                          ? "bg-green-500"
+                          : "bg-orange-500"
                       }`}
                     />
                     <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -421,63 +452,68 @@ export const ProjectView = () => {
                 </div>
 
                 <Droppable droppableId={column.id}>
-  {(provided, snapshot) => (
-    <div
-      {...provided.droppableProps}
-      ref={provided.innerRef}
-      className={`space-y-2 p-2 rounded-lg transition-colors flex flex-col ${
-        snapshot.isDraggingOver ? 'bg-accent/50' : ''
-      }`}
-      style={{
-        overflowY: 'auto',
-        maxHeight: 'calc(100vh - 200px)',
-        overscrollBehavior: 'contain',
-      }}
-    >
-      {column.tasks.map((task, index) => (
-        <Draggable key={task.id} draggableId={task.id} index={index}>
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.draggableProps}
-              {...provided.dragHandleProps}
-              style={{
-                ...provided.draggableProps.style,
-              }}
-              className={`transition-all duration-200 ${
-                snapshot.isDragging
-                  ? 'rotate-1 scale-105 shadow-2xl z-50'
-                  : ''
-              }`}
-            >
-              <TaskCard
-                task={task}
-                onUpdateTask={(updates) =>
-                  updateTask(project.id, task.id, updates)
-                }
-                onDeleteTask={() => deleteTask(project.id, task.id)}
-              />
-            </div>
-          )}
-        </Draggable>
-      ))}
-      {provided.placeholder}
+                  {(provided, snapshot) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className={`space-y-2 p-2 rounded-lg transition-colors flex flex-col ${
+                        snapshot.isDraggingOver ? "bg-accent/50" : ""
+                      }`}
+                      style={{
+                        overflowY: "auto",
+                        maxHeight: "calc(100vh - 200px)",
+                        overscrollBehavior: "contain",
+                      }}
+                    >
+                      {column.tasks.map((task, index) => (
+                        <Draggable
+                          key={task.id}
+                          draggableId={task.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={{
+                                ...provided.draggableProps.style,
+                              }}
+                              className={`transition-all duration-200 ${
+                                snapshot.isDragging
+                                  ? "rotate-1 scale-105 shadow-2xl z-50"
+                                  : ""
+                              }`}
+                            >
+                              <TaskCard
+                                task={task}
+                                onUpdateTask={(updates) =>
+                                  updateTask(project.id, task.id, updates)
+                                }
+                                onDeleteTask={() =>
+                                  deleteTask(project.id, task.id)
+                                }
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
 
-      <Button
-        variant="ghost"
-        className="w-full justify-start text-muted-foreground hover:text-foreground h-8 text-xs"
-        onClick={() => {
-          setActiveColumn(column.id);
-          setShowAddTask(true);
-        }}
-      >
-        <Plus className="h-3 w-3 mr-2" />
-        Add Task
-      </Button>
-    </div>
-  )}
-</Droppable>
-
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-muted-foreground hover:text-foreground h-8 text-xs"
+                        onClick={() => {
+                          setActiveColumn(column.id);
+                          setShowAddTask(true);
+                        }}
+                      >
+                        <Plus className="h-3 w-3 mr-2" />
+                        Add Task
+                      </Button>
+                    </div>
+                  )}
+                </Droppable>
               </div>
             ))}
 
