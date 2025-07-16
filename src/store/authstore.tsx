@@ -81,7 +81,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   fetchProjects: async () => {
     try {
       const res = await API.get("/api/projects");
-      // console.log('projectsss', res.data)
+      console.log('projectsss', res.data)
       set({ projects: res.data });
     } catch (e) {
       console.log(e);

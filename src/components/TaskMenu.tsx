@@ -67,8 +67,8 @@ export const TaskMenu: React.FC<TaskMenuProps> = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+      <DropdownMenuTrigger asChild className='p-0'>
+        <Button variant="ghost" size="sm" className="h-5 w-5 p-2">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

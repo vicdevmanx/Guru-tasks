@@ -133,7 +133,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup>
+          <SidebarGroup className={`${collapsed && 'flex flex-col items-center'}`}>
             <div className="flex items-center justify-between">
               {!collapsed && (
                 <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -146,7 +146,7 @@ export function AppSidebar() {
                 className="h-6 w-6 p-0 hover:bg-accent"
                 onClick={() => setShowCreateProject(true)}
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-5 w-5" />
               </Button>
             </div>
             <SidebarGroupContent>
@@ -169,10 +169,10 @@ export function AppSidebar() {
                                   : undefined
                               }
                               alt={project.name}
-                              className="object-cover text-xs w-5 h-5 rounded"
+                              className="object-cover w-5 h-5 flex-grow-1 rounded"
                             />
                           ) : (
-                            <div className="text-xs w-5 h-5 rounded bg-primary/20 flex-shrink-0 flex items-center justify-center">
+                            <div className="text-xs w-5 h-5 rounded bg-primary/20 flex-grow-1 flex items-center justify-center">
                               {project.name
                                 .split(" ")
                                 .map((n) => n[0])

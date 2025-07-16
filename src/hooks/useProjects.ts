@@ -47,7 +47,11 @@ export interface Task {
   priority: "low" | "medium" | "high";
   assignees: User[];
   createdAt: Date;
-  dueDate?: Date;
+  due_date?: Date | undefined | null;
+  // project_id?: string;
+  // name?: string;
+  // assignee_id: string;
+  // tags: string[]
 }
 
 export interface ChatMessage {
@@ -191,9 +195,21 @@ export interface ChatMessage {
 export const useProjects = () => {
   const projects = useAuthStore((s) => s.projects);
   const setProjects = useAuthStore((s) => s.setProjects);
-  
-//  const storeProjects = []
-//   const [ nice, setProjects] = useState<Project[]>(storeProjects || []);
+
+
+
+   //  {
+//         id: 'task-1',
+//         title: 'Design mockups',
+//         description: 'Create initial design mockups for the homepage',
+//         status: 'todo',
+//         priority: 'high',
+//         assignees: [mockUsers[1]],
+//         createdAt: new Date(),
+//       },
+
+  //  const storeProjects = []
+  //   const [ nice, setProjects] = useState<Project[]>(storeProjects || []);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   // const [users] = useState<User[]>(mockUsers);
@@ -267,27 +283,56 @@ export const useProjects = () => {
 
   const deleteProject = async (id: string) => {
     setProjects((prev) => prev.filter((project) => project.id !== id));
-    try{
-    const res = await API.delete(`api/projects/${id}`)
-    }catch(e){
-      console.log(e)
+    try {
+      const res = await API.delete(`api/projects/${id}`);
+    } catch (e) {
+      console.log(e);
     }
   };
 
-  const addTask = (projectId: string, task: Omit<Task, "id" | "createdAt">) => {
-    const newTask: Task = {
-      ...task,
-      id: Date.now().toString(),
-      createdAt: new Date(),
+  const addTask = async (
+    projectId: string,
+    task: Omit<Task, "id" | "createdAt">
+  ) => {
+    const newTask = {
+      project_id: projectId,
+      name: task.title,
+      description: task.description,
+      assignee_id: task.assignees[0].id,
+      status: task.status, // this is the text from frontend
+      tags: [],
+      due_date: task.due_date,
     };
 
-    setProjects((prev) =>
+     setProjects((prev) =>
       prev.map((project) =>
         project.id === projectId
-          ? { ...project, tasks: [...project.tasks, newTask] }
+          ? {
+              ...project,
+              tasks: [
+                ...project.tasks,
+                { ...task, id: Date.now().toString(), createdAt: new Date() },
+              ],
+            }
           : project
       )
     );
+
+    console.log(newTask);
+    try {
+      const res = await fetch(`${baseURL}/api/tasks`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json", // 👈👈 This tells the server what to expect
+    Authorization: `Bearer ${Cookies.get("token")}`,
+  },
+  body: JSON.stringify(newTask),
+});
+
+      console.log(res);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const updateTask = (

@@ -59,7 +59,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
     project.tasks
       .filter(
         (task) =>
-          task.title.toLowerCase().includes(query.toLowerCase()) ||
+          a.toLowerCase().includes(query.toLowerCase()) ||
           task.description?.toLowerCase().includes(query.toLowerCase())
       )
       .map((task) => ({
@@ -120,7 +120,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
               >
                 <Hash className="h-4 w-4" />
                 <div className="flex-1">
-                  <p className="font-medium">{task.title}</p>
+                  <p className="font-medium">{a}</p>
                   <p className="text-xs text-muted-foreground">
                     in {task.projectName}
                   </p>

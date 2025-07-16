@@ -199,7 +199,8 @@ export const ProjectView = () => {
           <CardContent>
             <div className="space-y-3">
               {project?.project_members.map((user) => (
-                <div
+                <Link
+                to={`/profile/${user.user.id}`}
                   key={user.user.id}
                   className="flex items-center gap-3 p-0 rounded-lg hover:bg-accent"
                 >
@@ -228,7 +229,7 @@ export const ProjectView = () => {
                   <Badge variant="secondary">
                     {user.user.user_roles?.name}
                   </Badge>
-                </div>
+                </Link>
               ))}
             </div>
           </CardContent>
@@ -393,11 +394,11 @@ export const ProjectView = () => {
       </div>
 
       {/* Board */}
-      <div className="relative flex-1 p-4">
+      <div className="relative flex-1 p-2">
         <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
           <div className="relative flex gap-4 h-full overflow-x-auto overflow-y-hidden">
             {statusColumns.map((column) => (
-              <div key={column.id} className="flex-shrink-0 w-80">
+              <div key={column.id} className="flex-shrink-0 w-64">
                 <div className="flex items-center justify-between mb-3 px-2">
                   <div className="flex items-center gap-2">
                     <div
@@ -540,7 +541,7 @@ export const ProjectView = () => {
           const taskWithStatus = activeColumn
             ? {
                 ...task,
-                status: activeColumn as "todo" | "in-progress" | "done",
+                status: activeColumn as "todo" | "review" | "in-progress" | "done",
               }
             : task;
           addTask(project.id, taskWithStatus);
