@@ -4,13 +4,13 @@ import API from "@/components/axios";
 import { Project } from "@/hooks/useProjects";
 
 export type User = {
-  access_role: string;
-  created_at: string;
+  access_role?: string;
+  created_at?: string;
   // user?: {id: string, name: string, email: string, profile_pic: string};
   email: string;
   id: string;
   name: string;
-  password: string;
+  password?: string;
   profile_pic?: string;
   reset_token?: string | null;
   reset_token_expires_at?: string | null;

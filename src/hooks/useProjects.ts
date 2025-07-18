@@ -298,7 +298,7 @@ export const useProjects = () => {
       project_id: projectId,
       name: task.title,
       description: task.description,
-      assignee_id: task.assignees[0].id,
+      assignee_id: task.assignees[0]?.id || null,
       status: task.status, // this is the text from frontend
       tags: [],
       due_date: task.due_date,
@@ -329,7 +329,9 @@ export const useProjects = () => {
   body: JSON.stringify(newTask),
 });
 
-      console.log(res);
+   const result = await res.json()
+
+      console.log(result);
     } catch (e) {
       console.log(e);
     }
