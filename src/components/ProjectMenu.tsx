@@ -1,15 +1,21 @@
-
-import React from 'react';
-import { MoreVertical, Edit3, Trash2, Archive, Copy, Users } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  MoreVertical,
+  Edit3,
+  Trash2,
+  Archive,
+  Copy,
+  Users,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Project } from '@/hooks/useProjects';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Project } from "@/hooks/useProjects";
 
 interface ProjectMenuProps {
   project: Project;
@@ -26,8 +32,10 @@ export const ProjectMenu: React.FC<ProjectMenuProps> = ({
   onDuplicate,
   onArchive,
 }) => {
+  const [open, setOpen] = useState(false);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -39,7 +47,13 @@ export const ProjectMenu: React.FC<ProjectMenuProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={() => {
+            setOpen(false);
+            onEdit();
+          }}
+          className="cursor-pointer"
+        >
           <Edit3 className="mr-2 h-4 w-4" />
           Edit Project
         </DropdownMenuItem>
@@ -56,8 +70,11 @@ export const ProjectMenu: React.FC<ProjectMenuProps> = ({
           <Archive className="mr-2 h-4 w-4" />
           Archive
         </DropdownMenuItem> */}
-        <DropdownMenuItem 
-          onClick={onDelete} 
+        <DropdownMenuItem
+          onClick={() => {
+            onDelete();
+            setOpen(false);
+          }}
           className="cursor-pointer text-destructive focus:text-destructive"
         >
           <Trash2 className="mr-2 h-4 w-4" />
