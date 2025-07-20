@@ -19,7 +19,7 @@ export const Calendar = () => {
   const daysInMonth = lastDayOfMonth.getDate();
 
   // Generate calendar days
-  const calendarDays: (number | null)[] = [];
+  const calendarDays = [];
   
   // Add empty cells for days before the first day of the month
   for (let i = 0; i < firstDayWeekday; i++) {
