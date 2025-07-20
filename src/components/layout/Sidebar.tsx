@@ -169,10 +169,10 @@ export function AppSidebar() {
                                   : undefined
                               }
                               alt={project.name}
-                              className="object-cover w-5 h-5 flex-grow-1 rounded"
+                              className="object-cover min-w-5 h-5 rounded text-center"
                             />
                           ) : (
-                            <div className="text-xs w-5 h-5 rounded bg-primary/20 flex-grow-1 flex items-center justify-center">
+                            <div className="text-xs min-w-5 h-5 rounded bg-primary/20 flex items-center justify-center text-center">
                               {project.name
                                 .split(" ")
                                 .map((n) => n[0])

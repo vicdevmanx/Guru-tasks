@@ -134,7 +134,7 @@ export const Team = () => {
               <div>
                 <p className="text-2xl font-bold">
                   {users &&
-                    users.filter((u) => u.access_role.includes("admin")).length}
+                    users.filter((u) => u?.access_role?.includes("admin")).length}
                 </p>
                 <p className="text-sm text-muted-foreground">Admins</p>
               </div>
@@ -151,7 +151,7 @@ export const Team = () => {
               <div>
                 <p className="text-2xl font-bold">
                   {users &&
-                    users.filter((u) => !u.access_role.includes("Admin"))
+                    users.filter((u) => !u?.access_role?.includes("Admin"))
                       .length}
                 </p>
                 <p className="text-sm text-muted-foreground">Team Members</p>

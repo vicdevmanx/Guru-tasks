@@ -33,42 +33,44 @@ export const Home = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const user = useAuthStore(s => s.user)
 
-  // const totalTasks = projects.reduce(
-  //   (acc, project) => acc + project.tasks.length,
-  //   0
-  // );
-  // const completedTasks = projects.reduce(
-  //   (acc, project) =>
-  //     acc + project.tasks.filter((task) => task.status === "done").length,
-  //   0
-  // );
-  // const pendingTasks = totalTasks - completedTasks;
+  const totalTasks = projects.reduce(
+    (acc, project) => acc + project.tasks.length,
+    0
+  );
+  const completedTasks = projects.reduce(
+    (acc, project) =>
+      acc + project.tasks.filter((task) => task.status === "done").length,
+    0
+  );
+  
+  const pendingTasks = totalTasks - completedTasks;
+   const users = useAuthStore((s) => s.users);
 
   const stats = [
   {
     title: "Total Tasks",
-    value: "24",
+    value: totalTasks,
     change: "+12%",
     icon: BarChart3,
     color: "text-blue-500"
   },
   {
     title: "Completed",
-    value: "18",
+    value: completedTasks,
     change: "+8%",
     icon: CheckCircle2,
     color: "text-green-500"
   },
   {
     title: "In Progress",
-    value: "6",
+    value: pendingTasks,
     change: "+4",
     icon: Clock,
     color: "text-orange-500"
   },
   {
     title: "Team Members",
-    value: "12",
+    value: users && users.length,
     change: "+2",
     icon: Users,
     color: "text-purple-500"
@@ -235,7 +237,7 @@ export const Home = () => {
       <EditProjectDialog
         open={showEditProject}
         onOpenChange={setShowEditProject}
-        project={selectedProject}
+        // project={selectedProject}
       />
     </div>
   );

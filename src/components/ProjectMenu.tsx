@@ -33,7 +33,7 @@ export const ProjectMenu: React.FC<ProjectMenuProps> = ({
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0 hover:bg-accent"
-          onClick={(e) => e.preventDefault()}
+          // onClick={(e) => e.preventDefault()}
         >
           <MoreVertical className="h-4 w-4" />
         </Button>
@@ -43,19 +43,19 @@ export const ProjectMenu: React.FC<ProjectMenuProps> = ({
           <Edit3 className="mr-2 h-4 w-4" />
           Edit Project
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onDuplicate} className="cursor-pointer">
+        {/* <DropdownMenuItem onClick={onDuplicate} className="cursor-pointer">
           <Copy className="mr-2 h-4 w-4" />
           Duplicate
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem className="cursor-pointer">
           <Users className="mr-2 h-4 w-4" />
           Manage Members
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onArchive} className="cursor-pointer">
+        {/* <DropdownMenuItem onClick={onArchive} className="cursor-pointer">
           <Archive className="mr-2 h-4 w-4" />
           Archive
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem 
           onClick={onDelete} 
           className="cursor-pointer text-destructive focus:text-destructive"
