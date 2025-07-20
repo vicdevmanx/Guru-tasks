@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, KeyboardEvent, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { X, Plus, Edit, Loader} from "lucide-react";
-import { useProjects } from "@/hooks/useProjects";
+import { useProjects, Project } from "@/hooks/useProjects";
 import { useAuthStore, User } from "@/store/authstore";
 import {
   Command,
@@ -22,16 +22,18 @@ import {
 } from "@/components/ui/command";
 import { toast } from "sonner";
 
-interface CreateProjectDialogProps {
+interface EditProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  project?: Project | null;
 }
 
-export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
+export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
   open,
   onOpenChange,
+  project,
 }) => {
-  const { addProject } = useProjects();
+  const { addProject, updateProject } = useProjects();
   const users = useAuthStore((s) => s.users);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -41,6 +43,40 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false)
 
+  // Initialize form with project data when editing
+  useEffect(() => {
+    if (open) {
+      if (project) {
+        setName(project.name);
+        setDescription(project.description || '');
+        setAssignees(project.project_members?.map(member => member.user) || []);
+        if (typeof project.image === 'string' && project.image) {
+          setPreviewUrl(project.image);
+        }
+      } else {
+        setName("");
+        setDescription("");
+        setAssignees([]);
+        setCurrentAssignee("");
+        setImage(null);
+        setPreviewUrl(null);
+      }
+    }
+  }, [project, open]);
+
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setName("");
+      setDescription("");
+      setAssignees([]);
+      setCurrentAssignee("");
+      setImage(null);
+      setPreviewUrl(null);
+      setLoading(false);
+    }
+  }, [open]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !description.trim()) {
@@ -48,24 +84,45 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
       return;
     }
 
-    // Create project logic here
-
-    setLoading(true)
-    await addProject(
-      name.trim(),
-      description.trim() || undefined,
-      assignees,
-      image
-    );
-    toast.success(`Project "${name}" created successfully!`);
-    setLoading(false)
-    setName("");
-    setDescription("");
-    setAssignees([]);
-    setCurrentAssignee("");
-    onOpenChange(false);
-    setImage(null);
-    setPreviewUrl(null);
+    setLoading(true);
+    
+    try {
+      if (project) {
+        // Update existing project
+        updateProject(project.id, {
+          name: name.trim(),
+          description: description.trim(),
+          project_members: assignees.map(user => ({
+            access_role: 'member',
+            created_at: new Date().toISOString(),
+            user: {
+              ...user,
+              profile_pic: user.profile_pic || ''
+            },
+            email: user.email,
+            id: user.id,
+            name: user.name,
+            password: '',
+          })),
+          image,
+        });
+        toast.success(`Project "${name}" updated successfully!`);
+      } else {
+        // Create new project
+        await addProject(
+          name.trim(),
+          description.trim() || undefined,
+          assignees,
+          image
+        );
+        toast.success(`Project "${name}" created successfully!`);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+      onOpenChange(false);
+    }
   };
 
   const handleAddAssignee = () => {
@@ -98,14 +155,16 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] animate-in fade-in-0 zoom-in-95 duration-200 max-h-screen overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] animate-in fade-in-0 zoom-in-95 data-[state=open]:animate-scale-in data-[state=closed]:animate-scale-out duration-200 max-h-screen overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-left">Create New Project</DialogTitle>
+          <DialogTitle className="text-left">
+            {project ? 'Edit Project' : 'Create New Project'}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-center gap-4">
             <label htmlFor="image-upload" className="cursor-pointer relative">
-              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-muted flex items-center justify-center border">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-muted flex items-center justify-center border hover:border-primary/50 transition-colors">
                 {previewUrl ? (
                   <div className="relative w-full h-full">
                     <img
@@ -113,7 +172,7 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
                       alt="Project"
                       className="object-cover w-full h-full"
                     />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity">
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity hover:bg-black/60">
                       <span className="text-white">
                         <Edit className="size-6" />
                       </span>
@@ -274,7 +333,7 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
                         title="remove assigned user"
                         type="button"
                         onClick={() => removeAssignee(user.id)}
-                        className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
+                        className="ml-1 hover:bg-destructive/20 rounded-full p-0.5 transition-colors"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -289,11 +348,17 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="transition-all duration-200 hover:scale-105"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || loading}>
-              {loading && <Loader className='size-8 animate-spin'/>} {loading ? "Creating..." : "Create Project"}
+            <Button 
+              type="submit" 
+              disabled={!name.trim() || loading}
+              className="transition-all duration-200 hover:scale-105"
+            >
+              {loading && <Loader className='size-4 animate-spin mr-2'/>} 
+              {loading ? (project ? "Updating..." : "Creating...") : (project ? "Update Project" : "Create Project")}
             </Button>
           </div>
         </form>
@@ -303,10 +368,3 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
 };
 
 
-
-//  useEffect(() => {
-//     if (project) {
-//       setName(project.name);
-//       setDescription(project.description || '');
-//     }
-//   }, [project]);

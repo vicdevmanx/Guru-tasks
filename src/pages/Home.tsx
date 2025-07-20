@@ -166,7 +166,7 @@ export const Home = () => {
             return (
               <div key={project.id} className="group relative">
                 <Link to={`/project/${project.id}`}>
-                  <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
+                  <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] cursor-pointer animate-fade-in">
                     <CardHeader className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -237,7 +237,7 @@ export const Home = () => {
       <EditProjectDialog
         open={showEditProject}
         onOpenChange={setShowEditProject}
-        // project={selectedProject}
+        project={selectedProject}
       />
     </div>
   );

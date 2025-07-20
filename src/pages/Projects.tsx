@@ -23,12 +23,15 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useProjects } from "@/hooks/useProjects";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
+import { EditProjectDialog } from "@/components/EditProjectDialog";
 import { ProjectMenu } from "@/components/ProjectMenu";
 import type { Project } from "@/hooks/useProjects";
 
 export const Projects = () => {
   const { projects, deleteProject } = useProjects();
   const [showCreateProject, setShowCreateProject] = useState(false);
+  const [showEditProject, setShowEditProject] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -39,6 +42,11 @@ export const Projects = () => {
         project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+  const handleEditProject = (project: Project) => {
+    setSelectedProject(project);
+    setShowEditProject(true);
+  };
 
   const handleDeleteProject = (projectId: string) => {
     if (
@@ -116,7 +124,7 @@ export const Projects = () => {
               return (
                 <div key={project.id} className="group relative">
                   <Link to={`/project/${project.id}`}>
-                    <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
+                    <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] cursor-pointer animate-fade-in">
                       <CardHeader className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -130,7 +138,7 @@ export const Projects = () => {
                           <div onClick={(e) => e.preventDefault()}>
                             <ProjectMenu
                               project={project}
-                              onEdit={() => {}}
+                              onEdit={() => handleEditProject(project)}
                               onDelete={() => handleDeleteProject(project.id)}
                               onDuplicate={() => {}}
                               onArchive={() => {}}
@@ -226,7 +234,7 @@ export const Projects = () => {
               return (
                 <Card
                   key={project.id}
-                  className="hover:shadow-md transition-shadow"
+                  className="hover:shadow-md transition-all duration-300 hover:scale-[1.01] animate-fade-in"
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
@@ -270,7 +278,7 @@ export const Projects = () => {
 
                         <ProjectMenu
                           project={project}
-                          onEdit={() => {}}
+                          onEdit={() => handleEditProject(project)}
                           onDelete={() => handleDeleteProject(project.id)}
                           onDuplicate={() => {}}
                           onArchive={() => {}}
@@ -287,6 +295,12 @@ export const Projects = () => {
       <CreateProjectDialog
         open={showCreateProject}
         onOpenChange={setShowCreateProject}
+      />
+
+      <EditProjectDialog
+        open={showEditProject}
+        onOpenChange={setShowEditProject}
+        project={selectedProject}
       />
     </div>
   );

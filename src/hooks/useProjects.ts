@@ -273,12 +273,46 @@ export const useProjects = () => {
     }
   };
 
-  const updateProject = (id: string, updates: Partial<Project>) => {
+  const updateProject = async (id: string, updates: Partial<Project>) => {
+    // Optimistically update the UI first
     setProjects((prev) =>
       prev.map((project) =>
         project.id === id ? { ...project, ...updates } : project
       )
     );
+
+    // Then sync with the backend
+    try {
+      const formData = new FormData();
+      if (updates.name) formData.append("name", updates.name);
+      if (updates.description) formData.append("description", updates.description);
+      if (updates.image && updates.image instanceof File) {
+        formData.append("image", updates.image);
+      }
+      if (updates.project_members) {
+        const memberIds = updates.project_members.map(member => member.user.id);
+        formData.append("member_ids", JSON.stringify(memberIds));
+      }
+
+      const res = await fetch(`${baseURL}/api/projects/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        console.log("Failed to update project on server");
+        // Optionally revert the optimistic update here
+      } else {
+        const result = await res.json();
+        console.log("Project updated successfully:", result);
+      }
+    } catch (error) {
+      console.log("Error updating project:", error);
+      // Optionally revert the optimistic update here
+    }
   };
 
   const deleteProject = async (id: string) => {

@@ -40,8 +40,8 @@ export const Settings = () => {
     name: user ? user?.name : "",
     email: user ? user?.email : "",
     // bio: 'Experienced project manager with a passion for delivering high-quality software solutions.',
-    access_role: user ? user?.access_role : "",
-    role: user ? user?.user_roles?.name : "",
+    access_role: user?.access_role || "",
+    role: user?.user_roles?.name || "",
     profile_pic: user ? user?.profile_pic : "",
   });
 
@@ -64,8 +64,8 @@ export const Settings = () => {
       name: user ? user?.name : "",
       email: user ? user?.email : "",
       // bio: 'Experienced project manager with a passion for delivering high-quality software solutions.',
-      access_role: user ? user?.access_role : "",
-      role: user ? user?.user_roles?.name : "",
+      access_role: user?.access_role || "",
+      role: user?.user_roles?.name || "",
       profile_pic: user ? user?.profile_pic : "",
     });
   }, [user]);
