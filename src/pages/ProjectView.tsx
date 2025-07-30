@@ -431,7 +431,7 @@ export const ProjectView = () => {
                     >
                       <Plus className="h-3 w-3" />
                     </Button>
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
@@ -448,7 +448,7 @@ export const ProjectView = () => {
                         <DropdownMenuItem>Clear Column</DropdownMenuItem>
                         <DropdownMenuItem>Archive Tasks</DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
                   </div>
                 </div>
 

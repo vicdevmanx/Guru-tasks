@@ -40,6 +40,30 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
+  const formatDueDate = (dueDate: string | Date) => {
+    const date = typeof dueDate === "string" ? new Date(dueDate) : dueDate;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const inputDate = new Date(date);
+    inputDate.setHours(0, 0, 0, 0);
+
+    const diffMs = inputDate.getTime() - today.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Tomorrow";
+    if (diffDays === -1) return "Yesterday";
+    if (diffDays > 1 && diffDays <= 6) return `In ${diffDays} days`;
+    if (diffDays < -1 && diffDays >= -6) return `${Math.abs(diffDays)} days ago`;
+
+    const day = inputDate.getDate();
+    const month = inputDate.toLocaleString("en-US", { month: "short" });
+    const year = inputDate.getFullYear();
+
+    return `${day} ${month} ${year}`;
+  };
+
   return (
     <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer">
       <CardContent className="p-3">
@@ -64,17 +88,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         )}
 
         <div className="flex items-center justify-between">
+          <div className="flex gap-2 items-center">
           <Badge
             variant="outline"
             className={`text-[0.65rem] ${getPriorityColor(task.priority)}`}
           >
             {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
           </Badge>
-          {/* {task.dueDate && (
+          {task?.due_date && (
             <span className="text-xs text-muted-foreground">
-              {new Date(task.dueDate).toLocaleDateString()}
+              {formatDueDate(task?.due_date)}
             </span>
-          )} */}
+          )}
+          </div>
           {task.assignees && task.assignees.length > 0 && (
             <div className="flex items-center gap-2">
               <Avatar className="w-6 h-6 ring-2 ring-border">
@@ -89,7 +115,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                     {task.assignees[0].name
                       .split(" ")
                       .map((n) => n[0])
-                      .join("").toUpperCase()}
+                      .join("")
+                      .toUpperCase()}
                   </AvatarFallback>
                 )}
               </Avatar>
