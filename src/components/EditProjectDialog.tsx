@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, KeyboardEvent, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { X, Plus, Edit, Loader} from "lucide-react";
-import { useProjects } from "@/hooks/useProjects";
+import { X, Plus, Edit, Loader } from "lucide-react";
+import { Project, useProjects } from "@/hooks/useProjects";
 import { useAuthStore, User } from "@/store/authstore";
 import {
   Command,
@@ -22,16 +22,18 @@ import {
 } from "@/components/ui/command";
 import { toast } from "sonner";
 
-interface CreateProjectDialogProps {
+interface EditProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  project: Project | null;
 }
 
-export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
+export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
   open,
   onOpenChange,
+  project,
 }) => {
-  const { addProject } = useProjects();
+  const { updateProject } = useProjects();
   const users = useAuthStore((s) => s.users);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -39,9 +41,27 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
   const [currentAssignee, setCurrentAssignee] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (project) {
+      setName(project.name);
+      setDescription(project.description || "");
+      if (typeof project.image === "string") {
+        setPreviewUrl(project.image);
+      }
+      if (project?.project_members)
+        setAssignees(project.project_members.map((member: any) => member.user));
+      console.log(project.project_members);
+    }
+  }, [project]);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (!project) {
+      e.preventDefault();
+      return;
+    }
+
     e.preventDefault();
     if (!name.trim() || !description.trim()) {
       toast("Please fill out all fields");
@@ -49,16 +69,18 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
     }
 
     // Create project logic here
+    const id = project.id;
 
-    setLoading(true)
-    await addProject(
+    setLoading(true);
+    await updateProject(
       name.trim(),
       description.trim() || undefined,
       assignees,
-      image
+      image,
+      id
     );
-    toast.success(`Project "${name}" created successfully!`);
-    setLoading(false)
+    toast.success(`Project "${name}" Saved successfully!`);
+    setLoading(false);
     setName("");
     setDescription("");
     setAssignees([]);
@@ -100,7 +122,7 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] animate-in fade-in-0 zoom-in-95 duration-200 max-h-screen overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-left">Create New Project</DialogTitle>
+          <DialogTitle className="text-left">Editing '{project && project.name}' Project</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-center gap-4">
@@ -160,7 +182,7 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
             <Textarea
               id="description"
               value={description}
-               disabled={loading}
+              disabled={loading}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter project description..."
               rows={3}
@@ -173,7 +195,7 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
                 <Input
                   placeholder="Type name or email..."
                   value={currentAssignee}
-                   disabled={loading}
+                  disabled={loading}
                   onChange={(e) => {
                     setCurrentAssignee(e.target.value);
                   }}
@@ -293,7 +315,8 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
               Cancel
             </Button>
             <Button type="submit" disabled={!name.trim() || loading}>
-              {loading && <Loader className='size-8 animate-spin'/>} {loading ? "Creating..." : "Create Project"}
+              {loading && <Loader className="size-8 animate-spin" />}{" "}
+              {loading ? "Updating..." : "Update Project"}
             </Button>
           </div>
         </form>
@@ -301,12 +324,3 @@ export const EditProjectDialog: React.FC<CreateProjectDialogProps> = ({
     </Dialog>
   );
 };
-
-
-
-//  useEffect(() => {
-//     if (project) {
-//       setName(project.name);
-//       setDescription(project.description || '');
-//     }
-//   }, [project]);

@@ -25,10 +25,13 @@ import { useProjects } from "@/hooks/useProjects";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
 import { ProjectMenu } from "@/components/ProjectMenu";
 import type { Project } from "@/hooks/useProjects";
+import { EditProjectDialog } from "@/components/EditProjectDialog";
 
 export const Projects = () => {
   const { projects, deleteProject } = useProjects();
   const [showCreateProject, setShowCreateProject] = useState(false);
+  const [showEditProject, setShowEditProject] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -39,6 +42,12 @@ export const Projects = () => {
         project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+
+  const handleEditProject = (project: Project) => {
+    setShowEditProject(true)
+    setSelectedProject(project)
+  }
 
   const handleDeleteProject = (projectId: string) => {
     if (
@@ -130,7 +139,7 @@ export const Projects = () => {
                           <div onClick={(e) => e.preventDefault()}>
                             <ProjectMenu
                               project={project}
-                              onEdit={() => {}}
+                              onEdit={() => {handleEditProject(project)}}
                               onDelete={() => handleDeleteProject(project.id)}
                               onDuplicate={() => {}}
                               onArchive={() => {}}
@@ -287,6 +296,12 @@ export const Projects = () => {
       <CreateProjectDialog
         open={showCreateProject}
         onOpenChange={setShowCreateProject}
+      />
+
+      <EditProjectDialog
+        open={showEditProject}
+        onOpenChange={setShowEditProject}
+        project={selectedProject}
       />
     </div>
   );

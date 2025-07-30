@@ -227,7 +227,7 @@ export const ProjectView = () => {
                     </p>
                   </div>
                   <Badge variant="secondary">
-                    {user.user.user_roles?.name}
+                    {user.user?.user_roles?.name}
                   </Badge>
                 </Link>
               ))}

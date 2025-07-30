@@ -125,16 +125,6 @@ export const TaskMenu: React.FC<TaskMenuProps> = ({
           Edit Task
         </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={handleDuplicate}>
-          <Copy className="mr-2 h-4 w-4" />
-          Duplicate
-        </DropdownMenuItem>
-
-        <DropdownMenuItem onClick={handleArchive}>
-          <Archive className="mr-2 h-4 w-4" />
-          Archive
-        </DropdownMenuItem>
-
         <DropdownMenuSeparator />
 
         <DropdownMenuItem 

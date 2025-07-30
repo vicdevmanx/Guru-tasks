@@ -237,7 +237,7 @@ export const Home = () => {
       <EditProjectDialog
         open={showEditProject}
         onOpenChange={setShowEditProject}
-        // project={selectedProject}
+        project={selectedProject}
       />
     </div>
   );

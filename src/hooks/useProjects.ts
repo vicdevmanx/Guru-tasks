@@ -15,7 +15,13 @@ import Cookies from "js-cookie";
 type Members = {
   access_role: string;
   created_at: string;
-  user: { id: string; name: string; email: string; profile_pic: string };
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    profile_pic: string;
+    user_roles?: { id: number; name: string };
+  };
   email: string;
   id: string;
   name: string;
@@ -35,7 +41,7 @@ export interface Project {
   createdAt: Date;
   tasks: Task[];
   assignees?: User[];
-  project_members: Members[] | [];
+  project_members: Members[];
   image?: File | null | string;
 }
 
@@ -196,17 +202,15 @@ export const useProjects = () => {
   const projects = useAuthStore((s) => s.projects);
   const setProjects = useAuthStore((s) => s.setProjects);
 
-
-
-   //  {
-//         id: 'task-1',
-//         title: 'Design mockups',
-//         description: 'Create initial design mockups for the homepage',
-//         status: 'todo',
-//         priority: 'high',
-//         assignees: [mockUsers[1]],
-//         createdAt: new Date(),
-//       },
+  //  {
+  //         id: 'task-1',
+  //         title: 'Design mockups',
+  //         description: 'Create initial design mockups for the homepage',
+  //         status: 'todo',
+  //         priority: 'high',
+  //         assignees: [mockUsers[1]],
+  //         createdAt: new Date(),
+  //       },
 
   //  const storeProjects = []
   //   const [ nice, setProjects] = useState<Project[]>(storeProjects || []);
@@ -273,12 +277,46 @@ export const useProjects = () => {
     }
   };
 
-  const updateProject = (id: string, updates: Partial<Project>) => {
-    setProjects((prev) =>
-      prev.map((project) =>
-        project.id === id ? { ...project, ...updates } : project
-      )
-    );
+  const updateProject = async (
+    name: string,
+    description?: string,
+    assignees: User[] = [],
+    image: File | null = null,
+    id?: string
+  ) => {
+    const formData = new FormData();
+    formData.append("name", name);
+    if (description) formData.append("description", description);
+    if (image) formData.append("image", image);
+
+    if (assignees.length) {
+      const ids = assignees.map((a) => a.id);
+      formData.append("member_ids", JSON.stringify(ids));
+    }
+
+    // console.log(newProject);
+    try {
+      const res = await fetch(`${baseURL}/api/projects/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+        body: formData,
+      });
+      if (!res.ok) {
+        console.log(res);
+        return;
+      }
+      const result = await res.json();
+      console.log(result);
+      setProjects((prev) =>
+        prev.map((project) =>
+          project.id === result.project.id ? result.project : project
+        )
+      );
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const deleteProject = async (id: string) => {
@@ -304,7 +342,7 @@ export const useProjects = () => {
       due_date: task.due_date,
     };
 
-     setProjects((prev) =>
+    setProjects((prev) =>
       prev.map((project) =>
         project.id === projectId
           ? {
@@ -321,15 +359,15 @@ export const useProjects = () => {
     console.log(newTask);
     try {
       const res = await fetch(`${baseURL}/api/tasks`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json", // 👈👈 This tells the server what to expect
-    Authorization: `Bearer ${Cookies.get("token")}`,
-  },
-  body: JSON.stringify(newTask),
-});
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // 👈👈 This tells the server what to expect
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+        body: JSON.stringify(newTask),
+      });
 
-   const result = await res.json()
+      const result = await res.json();
 
       console.log(result);
     } catch (e) {
@@ -356,7 +394,7 @@ export const useProjects = () => {
     );
   };
 
-  const deleteTask = (projectId: string, taskId: string) => {
+  const deleteTask = async (projectId: string, taskId: string) => {
     setProjects((prev) =>
       prev.map((project) =>
         project.id === projectId
@@ -367,9 +405,21 @@ export const useProjects = () => {
           : project
       )
     );
+
+    try {
+      const res = await fetch(`${baseURL}/api/tasks/${taskId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json", // 👈👈 This tells the server what to expect
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
+      const result = res.json();
+      console.log(result);
+    } catch (e) {}
   };
 
-  const moveTaskToStatus = (
+  const moveTaskToStatus = async (
     projectId: string,
     taskId: string,
     newStatus: Task["status"]
@@ -386,6 +436,22 @@ export const useProjects = () => {
           : project
       )
     );
+
+    try {
+      const res = await fetch(`${baseURL}/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json", // 👈👈 This tells the server what to expect
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const result = await res.json();
+      console.log(result);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const reorderTasks = (
