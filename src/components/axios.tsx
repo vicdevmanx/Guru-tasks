@@ -1,9 +1,10 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-export const baseURL = "http://localhost:5000"
-
+export const baseURL = "https://guru-tasks-api.vercel.app"
+//http://localhost:5000
+//https://guru-tasks-api.vercel.app
 const API = axios.create({
-  baseURL: "http://localhost:5000"
+  baseURL: "https://guru-tasks-api.vercel.app"
 });
 
 API.interceptors.request.use((config) => {
